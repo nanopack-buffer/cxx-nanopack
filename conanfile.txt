@@ -1,0 +1,8 @@
+[requires]
+argparse/2.9
+libyaml/0.2.5
+onetbb/2021.10.0
+
+[generators]
+CMakeDeps
+CMakeToolchain
