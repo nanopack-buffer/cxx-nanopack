@@ -37,7 +37,7 @@ NanoBuf Person::data() {
   buf.write_field_size(1, last_name.size());
   buf.append_string(last_name);
 
-  buf.write_field_size(2, 1);
+  buf.write_field_size(2, sizeof(int32_t));
   buf.append_int32(age);
 
   return buf;
