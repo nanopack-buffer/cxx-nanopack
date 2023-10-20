@@ -17,6 +17,8 @@ public:
 
   std::string last_name;
 
+  int32_t age;
+
   Person();
 
   explicit Person(std::vector<uint8_t> &data);

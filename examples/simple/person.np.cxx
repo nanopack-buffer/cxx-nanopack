@@ -20,6 +20,10 @@ Person::Person(std::vector<uint8_t> &data) {
   std::string last_name = buf.read_string(ptr, last_name_size);
   ptr += last_name_size;
   this->last_name = last_name;
+
+  const int32_t age = buf.read_int32(ptr);
+  ptr += sizeof(int32_t);
+  this->age = age;
 }
 
 NanoBuf Person::data() {
@@ -32,6 +36,9 @@ NanoBuf Person::data() {
 
   buf.write_field_size(1, last_name.size());
   buf.append_string(last_name);
+
+  buf.write_field_size(2, 1);
+  buf.append_int32(age);
 
   return buf;
 }

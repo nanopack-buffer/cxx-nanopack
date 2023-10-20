@@ -1,9 +1,13 @@
 #include "cxx_generator.hxx"
 #include "../../data_type/np_bool.hxx"
+#include "../../data_type/np_double.hxx"
+#include "../../data_type/np_int32.hxx"
 #include "../../data_type/np_int8.hxx"
 #include "../../data_type/np_string.hxx"
 #include "../../string_util/case_conv.hxx"
 #include "cxx_bool_generator.hxx"
+#include "cxx_double_generator.hxx"
+#include "cxx_int32_generator.hxx"
 #include "cxx_int8_generator.hxx"
 #include "cxx_string_generator.hxx"
 #include <filesystem>
@@ -25,6 +29,14 @@ CxxGenerator::CxxGenerator() : data_type_generators() {
 	data_type_generators.insert({
 		NanoPackInt8::IDENTIFIER,
 		new CxxInt8Generator(),
+	});
+	data_type_generators.insert({
+		NanoPackInt32::IDENTIFIER,
+		new CxxInt32Generator(),
+	});
+	data_type_generators.insert({
+		NanoPackDouble::IDENTIFIER,
+		new CxxDoubleGenerator(),
 	});
 	data_type_generators.insert({
 		NanoPackString::IDENTIFIER,

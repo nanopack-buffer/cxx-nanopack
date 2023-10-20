@@ -9,6 +9,8 @@ as well as the source code for `nanoc`, the codegen tool for generating NanoPack
 - CMake >= 3.25.2
 - Conan 2
 - An appropriate C++ compiler, e.g. Clang
+- Clang-format (`nanoc` formats the generated C++ code with `clang-format`)
+    - A flag to change the code formatter may be introduced in the future.
 
 Please follow this guide on [Conan](https://docs.conan.io/2/tutorial/consuming_packages/build_simple_cmake_project.html)
 on how to initialize and build a conan 2 project. I will compile the steps and write it down here at some point, but it
