@@ -30,7 +30,7 @@ void CxxDoubleGenerator::generate_write_field_code(std::ostream &out,
 	// clang-format off
 	out
 	// write the size of double to the size header
-	<< "  buf.write_field_size(" << field.field_number << ", 1);" << std::endl
+	<< "  buf.write_field_size(" << field.field_number << ", sizeof(double));" << std::endl
 	// append the double value to the end of the buffer
 	<< "  buf.append_double(" << field.field_name << ");" << std::endl
 	<< std::endl;

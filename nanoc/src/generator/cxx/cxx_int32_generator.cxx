@@ -30,7 +30,7 @@ void CxxInt32Generator::generate_write_field_code(std::ostream &out,
 	// clang-format off
 	out
 	// write the size of int32 to the size header
-	<< "  buf.write_field_size(" << field.field_number << ", 1);" << std::endl
+	<< "  buf.write_field_size(" << field.field_number << ", sizeof(int32_t));" << std::endl
 	// append the int32 value to the end of the buffer
 	<< "  buf.append_int32(" << field.field_name << ");" << std::endl
 	<< std::endl;
