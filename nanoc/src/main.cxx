@@ -1,4 +1,4 @@
-#include "generator/cxx_generator.hxx"
+#include "generator/cxx/cxx_generator.hxx"
 #include "message_schema.hxx"
 #include "parser/parse_schema.hxx"
 #include <argparse/argparse.hpp>

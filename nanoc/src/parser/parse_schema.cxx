@@ -1,8 +1,46 @@
 #include "parse_schema.hxx"
+#include "../data_type/type_factory.hxx"
 #include <filesystem>
 #include <functional>
 #include <optional>
 #include <yaml.h>
+
+struct TypeExpression {
+	DataType *data_type;
+	int field_number;
+};
+
+std::optional<TypeExpression>
+parse_type_expression(const std::string &expression) {
+	// get field number
+	// example: string:4, field number is 4
+	const size_t pos = expression.find_last_of(':');
+
+	const bool no_type_name = pos == 0;
+	const bool no_colon_found = pos == std::string::npos;
+	const bool no_field_number_declared = pos == expression.length() - 1;
+	if (no_type_name || no_colon_found || no_field_number_declared) {
+		return std::nullopt;
+	}
+
+	int field_number = atoi(expression.substr(pos + 1).c_str());
+	if (field_number <= 0) {
+		// the specified field number in the expression is invalid
+		// note: 0 is not considered a valid type id!
+		return std::nullopt;
+	}
+
+	const std::string type_literal = expression.substr(0, pos);
+	DataType *data_type = create_type_from_identifier(type_literal);
+	if (data_type == nullptr) {
+		return std::nullopt;
+	}
+
+	return TypeExpression{
+		.data_type = data_type,
+		.field_number = field_number,
+	};
+}
 
 std::optional<MessageSchema> parse_schema_file(const std::string &file_path) {
 	yaml_parser_t parser;
@@ -90,26 +128,22 @@ std::optional<MessageSchema> parse_schema_file(const std::string &file_path) {
 			} else {
 				// field declaration encountered, treat current token as
 				// type of the field
-				std::string field_type(
+				std::string type_expression_str(
 					reinterpret_cast<char *>(token.data.scalar.value),
 					token.data.scalar.length);
 
-				// get field number
-				// example: string:4, field number is 4
-				const size_t pos = field_type.find_last_of(':');
-				if (pos == std::string::npos) {
-					// field number is not specified for this field, so it is
-					// not valid
+				std::optional<TypeExpression> type_expression =
+					parse_type_expression(type_expression_str);
+				if (!type_expression.has_value()) {
 					parse_failed = true;
 					break;
 				}
 
-				int field_number = atoi(field_type.substr(pos + 1).c_str());
-
 				schema.fields.emplace_back(MessageField{
-					.type_name = field_type.substr(0, pos),
+					.type = type_expression->data_type,
+					.type_name = type_expression->data_type->identifier(),
 					.field_name = key_name,
-					.field_number = field_number,
+					.field_number = type_expression->field_number,
 				});
 			}
 			continue;

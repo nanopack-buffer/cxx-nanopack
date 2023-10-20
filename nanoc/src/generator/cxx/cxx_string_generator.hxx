@@ -1,0 +1,21 @@
+#ifndef NANOPACK_NANOC_CPP_STRING_HXX
+#define NANOPACK_NANOC_CPP_STRING_HXX
+
+#include "../data_type_code_generator.hxx"
+
+class CxxStringGenerator : public DataTypeCodeGenerator {
+  public:
+	void generate_field_declaration(std::ostream &out,
+									const MessageField &field) override;
+
+	void generate_read_code(std::ostream &out,
+							const std::string &var_name) override;
+
+	void generate_read_code(std::ostream &out,
+							const MessageField &field) override;
+
+	void generate_write_field_code(std::ostream &out,
+								   const MessageField &field) override;
+};
+
+#endif // NANOPACK_NANOC_CPP_STRING_HXX
