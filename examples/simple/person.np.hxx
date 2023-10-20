@@ -14,8 +14,9 @@ public:
   static const int32_t TYPE_ID = 1;
 
   std::string first_name;
+
   std::string last_name;
-  int32_t age;
+
   Person();
 
   explicit Person(std::vector<uint8_t> &data);

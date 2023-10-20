@@ -7,12 +7,13 @@
 #include <vector>
 
 struct MessageField {
-	DataType *type;
+	std::shared_ptr<DataType> type;
 	std::string type_name;
 	std::string field_name;
 	int field_number;
 
-	~MessageField();
+	MessageField(std::shared_ptr<DataType> type, std::string typeName,
+				 std::string fieldName, int fieldNumber);
 };
 
 struct MessageSchema {

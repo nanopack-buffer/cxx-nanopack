@@ -2,11 +2,12 @@
 #include "../data_type/type_factory.hxx"
 #include <filesystem>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <yaml.h>
 
 struct TypeExpression {
-	DataType *data_type;
+	std::shared_ptr<DataType> data_type;
 	int field_number;
 };
 
@@ -23,22 +24,28 @@ parse_type_expression(const std::string &expression) {
 		return std::nullopt;
 	}
 
-	int field_number = atoi(expression.substr(pos + 1).c_str());
-	if (field_number <= 0) {
+	errno = 0;
+	const long field_number =
+		std::strtol(expression.substr(pos + 1).c_str(), nullptr, 10);
+	const bool field_number_out_of_range =
+		field_number > std::numeric_limits<int>::max() ||
+		field_number < std::numeric_limits<int>::min();
+	if (errno != 0 || field_number_out_of_range) {
 		// the specified field number in the expression is invalid
 		// note: 0 is not considered a valid type id!
 		return std::nullopt;
 	}
 
 	const std::string type_literal = expression.substr(0, pos);
-	DataType *data_type = create_type_from_identifier(type_literal);
+	std::shared_ptr<DataType> data_type =
+		create_type_from_identifier(type_literal);
 	if (data_type == nullptr) {
 		return std::nullopt;
 	}
 
 	return TypeExpression{
 		.data_type = data_type,
-		.field_number = field_number,
+		.field_number = static_cast<int>(field_number),
 	};
 }
 
@@ -118,7 +125,7 @@ std::optional<MessageSchema> parse_schema_file(const std::string &file_path) {
 				// value of type id
 				const int type_id =
 					atoi(reinterpret_cast<char *>(token.data.scalar.value));
-				if (type_id == 0) {
+				if (type_id <= 0) {
 					// invalid type id found
 					parse_failed = true;
 					break;
@@ -139,12 +146,10 @@ std::optional<MessageSchema> parse_schema_file(const std::string &file_path) {
 					break;
 				}
 
-				schema.fields.emplace_back(MessageField{
-					.type = type_expression->data_type,
-					.type_name = type_expression->data_type->identifier(),
-					.field_name = key_name,
-					.field_number = type_expression->field_number,
-				});
+				schema.fields.emplace_back(
+					type_expression->data_type,
+					type_expression->data_type->identifier(), key_name,
+					type_expression->field_number);
 			}
 			continue;
 		}

@@ -9,6 +9,7 @@
 #include "np_string.hxx"
 #include <string>
 
-DataType *create_type_from_identifier(const std::string &identifier);
+std::shared_ptr<DataType>
+create_type_from_identifier(const std::string &identifier);
 
 #endif // NANOPACK_NANOC_TYPE_FACTORY_HXX

@@ -17,6 +17,8 @@ class CxxGenerator {
 	void generate_code_file(const MessageSchema &schema,
 							const std::string &header_file_name);
 
+	void format_code_file(const std::filesystem::path &path);
+
   public:
 	CxxGenerator();
 	~CxxGenerator();

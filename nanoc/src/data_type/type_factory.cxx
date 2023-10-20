@@ -1,20 +1,21 @@
 #include "type_factory.hxx"
 
-DataType *create_type_from_identifier(const std::string &identifier) {
+std::shared_ptr<DataType>
+create_type_from_identifier(const std::string &identifier) {
 	if (identifier == NanoPackBool::IDENTIFIER) {
-		return new NanoPackBool();
+		return std::make_shared<NanoPackBool>();
 	}
 	if (identifier == NanoPackInt8::IDENTIFIER) {
-		return new NanoPackInt8();
+		return std::make_shared<NanoPackInt8>();
 	}
 	if (identifier == NanoPackInt32::IDENTIFIER) {
-		return new NanoPackInt32();
+		return std::make_shared<NanoPackInt32>();
 	}
 	if (identifier == NanoPackDouble::IDENTIFIER) {
-		return new NanoPackDouble();
+		return std::make_shared<NanoPackInt32>();
 	}
 	if (identifier == NanoPackString::IDENTIFIER) {
-		return new NanoPackString();
+		return std::make_shared<NanoPackString>();
 	}
 	// TODO: support message type as type literal
 	return nullptr;
