@@ -5,17 +5,24 @@
 
 class CxxDoubleGenerator : public DataTypeCodeGenerator {
   public:
-	void generate_field_declaration(std::ostream &out,
+	std::string get_type_declaration(NanoPack::DataType *data_type) override;
+
+	std::string get_read_size_expression(const std::string &var_name) override;
+
+	void generate_field_declaration(CodeOutput &output,
 									const MessageField &field) override;
 
-	void generate_read_code(std::ostream &out,
+	void generate_read_code(CodeOutput &output, NanoPack::DataType *type,
 							const std::string &var_name) override;
 
-	void generate_read_code(std::ostream &out,
+	void generate_read_code(CodeOutput &output,
 							const MessageField &field) override;
 
-	void generate_write_field_code(std::ostream &out,
-								   const MessageField &field) override;
+	void generate_write_code(CodeOutput &output, NanoPack::DataType *type,
+							 const std::string &var_name) override;
+
+	void generate_write_code(CodeOutput &output,
+							 const MessageField &field) override;
 };
 
 #endif // NANOPACK_CXX_DOUBLE_GENERATOR_HXX

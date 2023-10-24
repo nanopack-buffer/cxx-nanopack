@@ -3,3 +3,4 @@ Person:
   first_name: string:0
   last_name: string:1
   age: int32:2
+  numbers: int32[]:3

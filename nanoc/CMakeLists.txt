@@ -21,6 +21,10 @@ add_executable(nanoc
         src/generator/cxx/cxx_double_generator.cxx
         src/message_schema.cxx
         src/data_type/type_factory.cxx
+        src/data_type/np_array.cxx
+        src/generator/cxx/cxx_array_generator.cxx
+        src/generator/data_type_code_generator.cxx
+        src/generator/code_output.cxx
 )
 
 target_link_libraries(nanoc argparse::argparse yaml onetbb::onetbb)

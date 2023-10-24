@@ -2,7 +2,7 @@
 
 #include "message_schema.hxx"
 
-MessageField::MessageField(std::shared_ptr<DataType> type,
+MessageField::MessageField(std::shared_ptr<NanoPack::DataType> type,
 						   std::string type_name, std::string field_name,
 						   int field_number)
 	: type(std::move(type)), type_name(std::move(type_name)),

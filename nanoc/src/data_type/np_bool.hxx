@@ -3,13 +3,19 @@
 
 #include "data_type.hxx"
 
-class NanoPackBool : public DataType {
+namespace NanoPack {
+
+class Bool : public DataType {
   public:
 	inline static const std::string IDENTIFIER = "bool";
 
 	std::string identifier() override;
 
 	bool is_fixed_size() override;
+
+	Size size() override;
 };
+
+} // namespace NanoPack
 
 #endif // NANOPACK_NANOC_NP_BOOL_HXX

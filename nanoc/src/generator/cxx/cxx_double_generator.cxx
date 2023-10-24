@@ -1,36 +1,57 @@
 #include "cxx_double_generator.hxx"
 
-void CxxDoubleGenerator::generate_field_declaration(std::ostream &out,
-													const MessageField &field) {
-	out << "double " << field.field_name << ";" << std::endl;
+std::string
+CxxDoubleGenerator::get_type_declaration(NanoPack::DataType *data_type) {
+	return "double";
 }
 
-void CxxDoubleGenerator::generate_read_code(std::ostream &out,
+std::string
+CxxDoubleGenerator::get_read_size_expression(const std::string &var_name) {
+	return "sizeof(double)";
+}
+
+void CxxDoubleGenerator::generate_field_declaration(CodeOutput &output,
+													const MessageField &field) {
+	output.stream() << get_type_declaration(nullptr) << " " << field.field_name
+					<< ";" << std::endl;
+}
+
+void CxxDoubleGenerator::generate_read_code(CodeOutput &output,
+											NanoPack::DataType *type,
 											const std::string &var_name) {
 	// clang-format off
-	out
-	<< "  const double " << var_name << " = buf.read_double(ptr);" << std::endl
-	<< "  ptr += sizeof(double);" << std::endl;
+	output.stream()
+	<< "const " << get_type_declaration(nullptr) << " " << var_name << " = buf.read_double(ptr);" << std::endl
+	<< "ptr += sizeof(double);" << std::endl;
 	// clang-format on
 }
 
-void CxxDoubleGenerator::generate_read_code(std::ostream &out,
+void CxxDoubleGenerator::generate_read_code(CodeOutput &output,
 											const MessageField &field) {
-	generate_read_code(out, field.field_name);
+	generate_read_code(output, nullptr, field.field_name);
 	// clang-format off
-	out
+	output.stream()
 	// store the double value to the field
-	<< " this->" << field.field_name << " = " << field.field_name << ";" << std::endl
+	<< "this->" << field.field_name << " = " << field.field_name << ";" << std::endl
 	<< std::endl;
 	// clang-format on
 }
 
-void CxxDoubleGenerator::generate_write_field_code(std::ostream &out,
-												   const MessageField &field) {
+void CxxDoubleGenerator::generate_write_code(CodeOutput &output,
+											 NanoPack::DataType *type,
+											 const std::string &var_name) {
 	// clang-format off
-	out
+	output.stream()
+	<< "buf.append_double(" << var_name << ");" << std::endl;
+	// clang-format on
+}
+
+void CxxDoubleGenerator::generate_write_code(CodeOutput &output,
+											 const MessageField &field) {
+	// clang-format off
+	output.stream()
 	// write the size of double to the size header
-	<< "  buf.write_field_size(" << field.field_number << ", sizeof(double));" << std::endl
+	<< "buf.write_field_size(" << field.field_number << ", sizeof(double));" << std::endl
 	// append the double value to the end of the buffer
 	<< "  buf.append_double(" << field.field_name << ");" << std::endl
 	<< std::endl;

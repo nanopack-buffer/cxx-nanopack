@@ -1,5 +1,7 @@
 #include "np_bool.hxx"
 
-std::string NanoPackBool::identifier() { return IDENTIFIER; }
+std::string NanoPack::Bool::identifier() { return IDENTIFIER; }
 
-bool NanoPackBool::is_fixed_size() { return true; }
+bool NanoPack::Bool::is_fixed_size() { return true; }
+
+NanoPack::Size NanoPack::Bool::size() { return 1; }

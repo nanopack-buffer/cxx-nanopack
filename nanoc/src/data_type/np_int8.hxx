@@ -3,13 +3,19 @@
 
 #include "data_type.hxx"
 
-class NanoPackInt8 : public DataType {
+namespace NanoPack {
+
+class Int8 : public DataType {
   public:
 	inline static const std::string IDENTIFIER = "int8";
 
 	std::string identifier() override;
 
 	bool is_fixed_size() override;
+
+	Size size() override;
 };
+
+} // namespace NanoPack
 
 #endif // NANOPACK_NANOC_NP_INT8_HXX

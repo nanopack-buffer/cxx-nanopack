@@ -9,7 +9,11 @@
 #include "np_string.hxx"
 #include <string>
 
-std::shared_ptr<DataType>
+namespace NanoPack {
+
+std::shared_ptr<NanoPack::DataType>
 create_type_from_identifier(const std::string &identifier);
+
+}
 
 #endif // NANOPACK_NANOC_TYPE_FACTORY_HXX

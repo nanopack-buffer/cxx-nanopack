@@ -7,7 +7,7 @@
 #include <yaml.h>
 
 struct TypeExpression {
-	std::shared_ptr<DataType> data_type;
+	std::shared_ptr<NanoPack::DataType> data_type;
 	int field_number;
 };
 
@@ -37,8 +37,8 @@ parse_type_expression(const std::string &expression) {
 	}
 
 	const std::string type_literal = expression.substr(0, pos);
-	std::shared_ptr<DataType> data_type =
-		create_type_from_identifier(type_literal);
+	std::shared_ptr<NanoPack::DataType> data_type =
+		NanoPack::create_type_from_identifier(type_literal);
 	if (data_type == nullptr) {
 		return std::nullopt;
 	}

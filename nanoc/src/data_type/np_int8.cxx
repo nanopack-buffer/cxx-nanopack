@@ -1,5 +1,7 @@
 #include "np_int8.hxx"
 
-std::string NanoPackInt8::identifier() { return IDENTIFIER; }
+std::string NanoPack::Int8::identifier() { return IDENTIFIER; }
 
-bool NanoPackInt8::is_fixed_size() { return true; }
+bool NanoPack::Int8::is_fixed_size() { return true; }
+
+NanoPack::Size NanoPack::Int8::size() { return 1; }

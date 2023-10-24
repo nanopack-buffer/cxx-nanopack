@@ -8,9 +8,12 @@
 
 class CxxGenerator {
   private:
+	std::shared_ptr<DataTypeCodeGeneratorRegistry> data_type_generator_registry;
+
 	std::map<std::string, DataTypeCodeGenerator *> data_type_generators;
 
-	DataTypeCodeGenerator *find_generator_for_field(const MessageField &field);
+	std::shared_ptr<DataTypeCodeGenerator>
+	find_generator_for_field(const MessageField &field);
 
 	std::string generate_header_file(const MessageSchema &schema);
 

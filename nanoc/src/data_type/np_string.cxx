@@ -1,5 +1,7 @@
 #include "np_string.hxx"
 
-std::string NanoPackString::identifier() { return IDENTIFIER; }
+std::string NanoPack::String::identifier() { return IDENTIFIER; }
 
-bool NanoPackString::is_fixed_size() { return false; }
+bool NanoPack::String::is_fixed_size() { return false; }
+
+NanoPack::Size NanoPack::String::size() { return DYNAMIC_SIZE; }
