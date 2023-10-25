@@ -8,7 +8,7 @@
 
 struct Person {
 private:
-  static const int FIELD_COUNT = 3;
+  static const int FIELD_COUNT = 4;
 
 public:
   static const int32_t TYPE_ID = 1;
@@ -18,6 +18,8 @@ public:
   std::string last_name;
 
   int32_t age;
+
+  std::vector<int32_t> numbers;
 
   Person();
 

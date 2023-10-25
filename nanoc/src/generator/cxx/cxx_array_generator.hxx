@@ -13,7 +13,8 @@ class CxxArrayGenerator : public DataTypeCodeGenerator {
 
 	std::string get_type_declaration(NanoPack::DataType *data_type) override;
 
-	std::string get_read_size_expression(const std::string &var_name) override;
+	std::string get_read_size_expression(NanoPack::DataType *data_type,
+										 const std::string &var_name) override;
 
 	void generate_field_declaration(CodeOutput &output,
 									const MessageField &field) override;

@@ -10,9 +10,11 @@ class DataTypeCodeGenerator {
   public:
 	virtual ~DataTypeCodeGenerator() = default;
 
-	virtual std::string get_type_declaration(NanoPack::DataType *data_type);
+	virtual std::string get_type_declaration(NanoPack::DataType *data_type) = 0;
 
-	virtual std::string get_read_size_expression(const std::string &var_name);
+	virtual std::string
+	get_read_size_expression(NanoPack::DataType *data_type,
+							 const std::string &var_name) = 0;
 
 	virtual void generate_field_declaration(CodeOutput &output,
 											const MessageField &field) = 0;

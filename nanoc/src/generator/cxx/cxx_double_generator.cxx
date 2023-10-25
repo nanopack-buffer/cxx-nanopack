@@ -6,7 +6,8 @@ CxxDoubleGenerator::get_type_declaration(NanoPack::DataType *data_type) {
 }
 
 std::string
-CxxDoubleGenerator::get_read_size_expression(const std::string &var_name) {
+CxxDoubleGenerator::get_read_size_expression(NanoPack::DataType *data_type,
+											 const std::string &var_name) {
 	return "sizeof(double)";
 }
 

@@ -6,7 +6,8 @@ CxxBoolGenerator::get_type_declaration(NanoPack::DataType *data_type) {
 }
 
 std::string
-CxxBoolGenerator::get_read_size_expression(const std::string &var_name) {
+CxxBoolGenerator::get_read_size_expression(NanoPack::DataType *data_type,
+										   const std::string &var_name) {
 	return "sizeof(bool)";
 }
 

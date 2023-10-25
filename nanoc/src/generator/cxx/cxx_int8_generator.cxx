@@ -6,7 +6,8 @@ CxxInt8Generator::get_type_declaration(NanoPack::DataType *data_type) {
 }
 
 std::string
-CxxInt8Generator::get_read_size_expression(const std::string &var_name) {
+CxxInt8Generator::get_read_size_expression(NanoPack::DataType *data_type,
+										   const std::string &var_name) {
 	return "sizeof(int8)";
 }
 

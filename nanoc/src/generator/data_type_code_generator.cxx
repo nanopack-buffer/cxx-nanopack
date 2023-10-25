@@ -17,7 +17,7 @@ void DataTypeCodeGeneratorRegistry::add_generator_for_type(
 std::shared_ptr<DataTypeCodeGenerator>
 DataTypeCodeGeneratorRegistry::find_generator_for_type(
 	NanoPack::DataType *data_type) {
-	find_generator_for_type(data_type->identifier());
+	return find_generator_for_type(data_type->identifier());
 }
 
 std::shared_ptr<DataTypeCodeGenerator>

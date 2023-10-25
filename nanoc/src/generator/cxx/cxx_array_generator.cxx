@@ -25,8 +25,15 @@ CxxArrayGenerator::get_type_declaration(NanoPack::DataType *data_type) {
 		   item_type_generator->get_type_declaration(item_type.get()) + ">";
 }
 
-std::string CxxArrayGenerator::get_read_size_expression(const std::string &var_name) {
-
+std::string
+CxxArrayGenerator::get_read_size_expression(NanoPack::DataType *data_type,
+											const std::string &var_name) {
+	const auto array_type = dynamic_cast<NanoPack::Array *>(data_type);
+	std::shared_ptr item_type = array_type->get_item_type();
+	if (item_type->is_fixed_size()) {
+		return var_name + ".size() * " + std::to_string(item_type->size());
+	}
+	return var_name + "_total_size";
 }
 
 void CxxArrayGenerator::generate_field_declaration(CodeOutput &output,
@@ -99,8 +106,17 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 		throw "something";
 	}
 
-	output.stream() << "buf.append_int32(" << var_name << ".size());"
-					<< std::endl;
+	// clang-format off
+	output.stream()
+	<< "buf.append_int32(" << var_name << ".size());" << std::endl;
+	// clang-format on
+
+	if (!item_type->is_fixed_size()) {
+		// clang-format off
+		output.stream()
+		<< "int32_t " << var_name << "_total_size = sizeof(int32_t);" << std::endl;
+		// clang-format on
+	}
 
 	std::string loop_var;
 	int i = 0;
@@ -114,6 +130,13 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 	output.add_variable_to_scope(loop_var);
 	item_type_generator->generate_write_code(output, item_type, loop_var);
 	output.remove_variable_from_scope(loop_var);
+
+	if (!item_type->is_fixed_size()) {
+		output.stream() << var_name << "_total_size += "
+						<< item_type_generator->get_read_size_expression(
+							   item_type, loop_var)
+						<< " + sizeof(int32_t);" << std::endl;
+	}
 
 	output.stream() << "}" << std::endl << std::endl;
 }
@@ -133,12 +156,13 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 	if (item_type->is_fixed_size()) {
 		// clang-format off
 		output.stream()
-		<< "buf.write_field_size(" << field.field_number << ", " << item_type->size() << " * " << field.field_name << ".size() + 1);" << std::endl;
+		<< "buf.write_field_size(" << field.field_number << ", " << item_type->size() << " * " << field.field_name << ".size() + sizeof(int32_t));" << std::endl;
 		// clang-format on
 	} else {
 		output.stream() << "int32_t total_size_written = sizeof(int32_t)";
 	}
 
+	// append number of elements in the array before the actual array data
 	output.stream() << "buf.append_int32(" << field.field_name << ".size());"
 					<< std::endl;
 
@@ -148,6 +172,21 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 		loop_var = "item" + std::to_string(i++);
 	} while (output.is_variable_in_scope(loop_var));
 
-	output.stream() << "for (auto " << loop_var << " : " << field.field_name
-					<< ") {" << std::endl;
+	// clang-format off
+	output.stream()
+	<< "for (auto " << loop_var << " : " << field.field_name << ") {" << std::endl;
+	// clang-format on
+
+	output.add_variable_to_scope(loop_var);
+	item_type_generator->generate_write_code(output, item_type, loop_var);
+	output.remove_variable_from_scope(loop_var);
+
+	if (!item_type->is_fixed_size()) {
+		output.stream() << "total_size_written += "
+						<< item_type_generator->get_read_size_expression(
+							   item_type, loop_var)
+						<< " + sizeof(int32_t);" << std::endl;
+	}
+
+	output.stream() << "}" << std::endl << std::endl;
 }

@@ -6,7 +6,8 @@ CxxInt32Generator::get_type_declaration(NanoPack::DataType *data_type) {
 }
 
 std::string
-CxxInt32Generator::get_read_size_expression(const std::string &var_name) {
+CxxInt32Generator::get_read_size_expression(NanoPack::DataType *data_type,
+											const std::string &var_name) {
 	return "sizeof(int32_t)";
 }
 

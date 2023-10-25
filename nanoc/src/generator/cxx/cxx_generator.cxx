@@ -1,10 +1,12 @@
 #include "cxx_generator.hxx"
+#include "../../data_type/np_array.hxx"
 #include "../../data_type/np_bool.hxx"
 #include "../../data_type/np_double.hxx"
 #include "../../data_type/np_int32.hxx"
 #include "../../data_type/np_int8.hxx"
 #include "../../data_type/np_string.hxx"
 #include "../../string_util/case_conv.hxx"
+#include "cxx_array_generator.hxx"
 #include "cxx_bool_generator.hxx"
 #include "cxx_double_generator.hxx"
 #include "cxx_int32_generator.hxx"
@@ -35,6 +37,9 @@ CxxGenerator::CxxGenerator()
 		NanoPack::Double::IDENTIFIER, std::make_shared<CxxDoubleGenerator>());
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::String::IDENTIFIER, std::make_shared<CxxStringGenerator>());
+	data_type_generator_registry->add_generator_for_type(
+		NanoPack::Array::IDENTIFIER,
+		std::make_shared<CxxArrayGenerator>(data_type_generator_registry));
 }
 
 CxxGenerator::~CxxGenerator() {
@@ -198,7 +203,9 @@ void CxxGenerator::generate_code_file(const MessageSchema &schema,
 		output_file_stream << std::endl;
 	}
 
-	output_file_stream << "return buf;" << std::endl << "}" << std::endl << std::endl;
+	output_file_stream << "return buf;" << std::endl
+					   << "}" << std::endl
+					   << std::endl;
 
 	output_file_stream.close();
 
