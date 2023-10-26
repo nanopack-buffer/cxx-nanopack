@@ -56,13 +56,19 @@ void CxxArrayGenerator::generate_read_code(CodeOutput &output,
 		throw "something";
 	}
 
+	// read, at the current read ptr, the number of elements that should be in
+	// the result vector, and store the number to <var_name>_vec_size
 	int32_generator->generate_read_code(output, nullptr,
 										var_name + "_vec_size");
 	// clang-format off
 	output.stream()
+	// instantiates a new vector with <var_name>_vec_size as the number of elements in the vector
 	<< get_type_declaration(type) << var_name << "(" << var_name << "_vec_size);" << std::endl;
 	// clang-format on
 
+	// finds a name for the loop variable that doesn't clash with existing
+	// variables, because the loop can be nested inside another loop,
+	// so simply using "i" as the loop var won't work.
 	std::string loop_var;
 	int i = 1;
 	do {
@@ -71,10 +77,12 @@ void CxxArrayGenerator::generate_read_code(CodeOutput &output,
 
 	// clang-format off
 	output.stream()
+	// keep reading data from the buffer until the vector is filled.
 	<< "for (int " << loop_var << " = 0; " << loop_var << " < " << var_name << "_vec_size; " << loop_var << "++) {" << std::endl;
 	// clang-format on
 
 	output.add_variable_to_scope(loop_var);
+	// generate code for reading buffer data into <loop_var>_item.
 	item_type_generator->generate_read_code(
 		output, array_type->get_item_type().get(), loop_var + "_item");
 	output.remove_variable_from_scope(loop_var);
@@ -82,6 +90,7 @@ void CxxArrayGenerator::generate_read_code(CodeOutput &output,
 	// clang-format off
 	output.stream()
 	<< std::endl
+	// store <loop_var>_item into the vector.
 	<< var_name << "[" << loop_var << "] = " << loop_var << "_item;" << std::endl
 	<< "}";
 	// clang-format on
@@ -108,16 +117,23 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 
 	// clang-format off
 	output.stream()
+	// append the number of elements in the vector into the buffer at the write ptr.
 	<< "buf.append_int32(" << var_name << ".size());" << std::endl;
 	// clang-format on
 
 	if (!item_type->is_fixed_size()) {
+		// declare a variable for storing the total byte size of all the
+		// elements in the array, which is accumulated later in the loop
+
 		// clang-format off
 		output.stream()
 		<< "int32_t " << var_name << "_total_size = sizeof(int32_t);" << std::endl;
 		// clang-format on
 	}
 
+	// finds a name for the loop variable that doesn't clash with existing
+	// variables, because the loop can be nested inside another loop,
+	// so simply using "i" as the loop var won't work.
 	std::string loop_var;
 	int i = 0;
 	do {
@@ -128,10 +144,13 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 					<< std::endl;
 
 	output.add_variable_to_scope(loop_var);
+	// generate code for writing each element in the vector into the buffer
 	item_type_generator->generate_write_code(output, item_type, loop_var);
 	output.remove_variable_from_scope(loop_var);
 
 	if (!item_type->is_fixed_size()) {
+		// store the byte size of the raw data of the item into the accumulator
+		// variable declared earlier.
 		output.stream() << var_name << "_total_size += "
 						<< item_type_generator->get_read_size_expression(
 							   item_type, loop_var)
@@ -154,12 +173,23 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 	}
 
 	if (item_type->is_fixed_size()) {
+		// the array has fixed size elements, so the total size of the array
+		// data can be calculated directly:
+		//
+		//     sizeof(element type) * number of elements in the vector +
+		//     sizeof(int32_t),
+		//
+		// where sizeof(int32_t) is the number that is used to store the number
+		// of elements in the vector.
+
 		// clang-format off
 		output.stream()
 		<< "buf.write_field_size(" << field.field_number << ", " << item_type->size() << " * " << field.field_name << ".size() + sizeof(int32_t));" << std::endl;
 		// clang-format on
 	} else {
-		output.stream() << "int32_t total_size_written = sizeof(int32_t)";
+		output.stream() << "int32_t " << field.field_name
+						<< "_total_size"
+						   " = sizeof(int32_t)";
 	}
 
 	// append number of elements in the array before the actual array data
@@ -178,15 +208,26 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 	// clang-format on
 
 	output.add_variable_to_scope(loop_var);
+	// generate code for writing each element in the vector into the buffer
 	item_type_generator->generate_write_code(output, item_type, loop_var);
 	output.remove_variable_from_scope(loop_var);
 
 	if (!item_type->is_fixed_size()) {
-		output.stream() << "total_size_written += "
+		// store the byte size of the raw data of the item into the variable
+		// declared earlier
+		output.stream() << field.field_name << "_total_size += "
 						<< item_type_generator->get_read_size_expression(
 							   item_type, loop_var)
 						<< " + sizeof(int32_t);" << std::endl;
 	}
 
 	output.stream() << "}" << std::endl << std::endl;
+
+	if (!item_type->is_fixed_size()) {
+		// write the accumulator variable declared earlier into the size header
+		// for the field
+		output.stream() << "buf.write_field_size(" << field.field_number << ", "
+						<< field.field_name << "_total_size);" << std::endl
+						<< std::endl;
+	}
 }
