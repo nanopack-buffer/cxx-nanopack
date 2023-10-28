@@ -11,6 +11,8 @@ class Array : public DataType {
 	std::shared_ptr<DataType> item_type;
 
   public:
+	inline static const std::string ARRAY_IDENTIFIER_START = "[";
+	inline static const std::string ARRAY_IDENTIFIER_END = "]";
 	inline static const std::string IDENTIFIER = "[]";
 
 	explicit Array(std::shared_ptr<DataType> item_type);

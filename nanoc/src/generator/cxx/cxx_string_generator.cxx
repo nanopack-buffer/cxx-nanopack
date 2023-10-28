@@ -8,7 +8,7 @@ CxxStringGenerator::get_type_declaration(NanoPack::DataType *data_type) {
 std::string
 CxxStringGenerator::get_read_size_expression(NanoPack::DataType *data_type,
 											 const std::string &var_name) {
-	return var_name + ".size()";
+	return var_name + ".size() + sizeof(int32_t)";
 }
 
 void CxxStringGenerator::generate_field_declaration(CodeOutput &output,

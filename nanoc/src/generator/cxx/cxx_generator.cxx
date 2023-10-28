@@ -4,6 +4,7 @@
 #include "../../data_type/np_double.hxx"
 #include "../../data_type/np_int32.hxx"
 #include "../../data_type/np_int8.hxx"
+#include "../../data_type/np_map.hxx"
 #include "../../data_type/np_string.hxx"
 #include "../../string_util/case_conv.hxx"
 #include "cxx_array_generator.hxx"
@@ -11,6 +12,7 @@
 #include "cxx_double_generator.hxx"
 #include "cxx_int32_generator.hxx"
 #include "cxx_int8_generator.hxx"
+#include "cxx_map_generator.hxx"
 #include "cxx_string_generator.hxx"
 #include <filesystem>
 #include <fstream>
@@ -40,6 +42,9 @@ CxxGenerator::CxxGenerator()
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::Array::IDENTIFIER,
 		std::make_shared<CxxArrayGenerator>(data_type_generator_registry));
+	data_type_generator_registry->add_generator_for_type(
+		NanoPack::Map::IDENTIFIER,
+		std::make_shared<CxxMapGenerator>(data_type_generator_registry));
 }
 
 CxxGenerator::~CxxGenerator() {

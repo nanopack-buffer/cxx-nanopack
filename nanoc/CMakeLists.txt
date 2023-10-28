@@ -25,6 +25,8 @@ add_executable(nanoc
         src/generator/cxx/cxx_array_generator.cxx
         src/generator/data_type_code_generator.cxx
         src/generator/code_output.cxx
+        src/data_type/np_map.cxx
+        src/generator/cxx/cxx_map_generator.cxx
 )
 
 target_link_libraries(nanoc argparse::argparse yaml onetbb::onetbb)

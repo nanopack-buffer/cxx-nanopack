@@ -1,5 +1,6 @@
 Person:
   type_id: 1
+  maps: <int32:string>[]:4
   first_name: string:0
   last_name: string:1
   age: int32:2

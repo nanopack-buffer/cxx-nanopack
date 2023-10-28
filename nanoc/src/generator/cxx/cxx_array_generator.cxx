@@ -154,10 +154,8 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 		output.stream() << var_name << "_total_size += "
 						<< item_type_generator->get_read_size_expression(
 							   item_type, loop_var)
-						<< " + sizeof(int32_t);" << std::endl;
+						<< ";" << std::endl;
 	}
-
-	output.stream() << "}" << std::endl << std::endl;
 }
 
 void CxxArrayGenerator::generate_write_code(CodeOutput &output,
@@ -188,8 +186,7 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 		// clang-format on
 	} else {
 		output.stream() << "int32_t " << field.field_name
-						<< "_total_size"
-						   " = sizeof(int32_t)";
+						<< "_total_size = sizeof(int32_t);" << std::endl;
 	}
 
 	// append number of elements in the array before the actual array data
@@ -204,7 +201,7 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 
 	// clang-format off
 	output.stream()
-	<< "for (auto " << loop_var << " : " << field.field_name << ") {" << std::endl;
+	<< "for (const auto &" << loop_var << " : " << field.field_name << ") {" << std::endl;
 	// clang-format on
 
 	output.add_variable_to_scope(loop_var);

@@ -8,7 +8,7 @@
 
 struct Person {
 private:
-  static const int FIELD_COUNT = 4;
+  static const int FIELD_COUNT = 5;
 
 public:
   static const int32_t TYPE_ID = 1;
@@ -20,6 +20,8 @@ public:
   int32_t age;
 
   std::vector<int32_t> numbers;
+
+  std::vector<std::unordered_map<int32_t, std::string>> maps;
 
   Person();
 
