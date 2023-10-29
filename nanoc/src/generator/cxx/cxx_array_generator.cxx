@@ -48,18 +48,21 @@ void CxxArrayGenerator::generate_read_code(CodeOutput &output,
 	const auto array_type = dynamic_cast<NanoPack::Array *>(type);
 	const auto int32_generator = generator_registry->find_generator_for_type(
 		NanoPack::Int32::IDENTIFIER);
+	NanoPack::DataType *item_type = array_type->get_item_type().get();
 	const auto item_type_generator =
-		generator_registry->find_generator_for_type(
-			array_type->get_item_type().get());
+		generator_registry->find_generator_for_type(item_type);
 	if (int32_generator == nullptr || item_type_generator == nullptr) {
 		// TODO: better error handling
 		throw "something";
 	}
 
-	// read, at the current read ptr, the number of elements that should be in
-	// the result vector, and store the number to <var_name>_vec_size
-	int32_generator->generate_read_code(output, nullptr,
-										var_name + "_vec_size");
+	if (!item_type->is_fixed_size()) {
+		// read, at the current read ptr, the number of elements that should be
+		// in the result vector, and store the number to <var_name>_vec_size
+		int32_generator->generate_read_code(output, nullptr,
+											var_name + "_vec_size");
+	}
+
 	// clang-format off
 	output.stream()
 	// instantiates a new vector with <var_name>_vec_size as the number of elements in the vector
@@ -98,6 +101,20 @@ void CxxArrayGenerator::generate_read_code(CodeOutput &output,
 
 void CxxArrayGenerator::generate_read_code(CodeOutput &output,
 										   const MessageField &field) {
+	const auto array_type =
+		std::dynamic_pointer_cast<NanoPack::Array>(field.type);
+
+	if (array_type->get_item_type()->is_fixed_size()) {
+		// for arrays with fixed size items, the number of elements in the array
+		// can be calculated.
+
+		// clang-format off
+		output.stream()
+		<< "const int32_t " << field.field_name << "_size = buf.read_field_size(" << field.field_number << ");" << std::endl
+		<< "const int32_t " << field.field_name << "_vec_vec_size = " << field.field_name << "_size / " << array_type->get_item_type()->size() << ";" << std::endl;
+		// clang-format on
+	}
+
 	generate_read_code(output, field.type.get(), field.field_name + "_vec");
 	output.stream() << "this->" << field.field_name << " = " << field.field_name
 					<< "_vec;" << std::endl;
@@ -175,23 +192,27 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 		// data can be calculated directly:
 		//
 		//     sizeof(element type) * number of elements in the vector +
-		//     sizeof(int32_t),
 		//
-		// where sizeof(int32_t) is the number that is used to store the number
-		// of elements in the vector.
+		// the number of elements in the array is not written to the buffer,
+		// unlike elements with dynamic size, since it can be determined easily:
+		//
+		//     number of elements in the vector = total byte size of vector /
+		//     sizeof(element type).
+		//
 
 		// clang-format off
 		output.stream()
-		<< "buf.write_field_size(" << field.field_number << ", " << item_type->size() << " * " << field.field_name << ".size() + sizeof(int32_t));" << std::endl;
+		<< "buf.write_field_size(" << field.field_number << ", " << item_type->size() << " * " << field.field_name << ".size());" << std::endl;
 		// clang-format on
 	} else {
-		output.stream() << "int32_t " << field.field_name
-						<< "_total_size = sizeof(int32_t);" << std::endl;
+		// clang-format off
+		output.stream()
+		// declare an accumulator variable to store the total size of the array
+		<< "int32_t " << field.field_name << "_total_size = sizeof(int32_t);" << std::endl
+		// append number of elements in the array before the actual array data
+		<< "buf.append_int32(" << field.field_name << ".size());" << std::endl;
+		// clang-format on
 	}
-
-	// append number of elements in the array before the actual array data
-	output.stream() << "buf.append_int32(" << field.field_name << ".size());"
-					<< std::endl;
 
 	std::string loop_var;
 	int i = 0;

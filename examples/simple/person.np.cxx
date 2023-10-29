@@ -25,8 +25,8 @@ Person::Person(std::vector<uint8_t> &data) {
   ptr += sizeof(int32_t);
   this->age = age;
 
-  const int32_t numbers_vec_vec_size = buf.read_int32(ptr);
-  ptr += sizeof(int32_t);
+  const int32_t numbers_size = buf.read_field_size(3);
+  const int32_t numbers_vec_vec_size = numbers_size / 4;
   std::vector<int32_t> numbers_vec(numbers_vec_vec_size);
   for (int i = 0; i < numbers_vec_vec_size; i++) {
     const int32_t i_item = buf.read_int32(ptr);
@@ -74,8 +74,7 @@ NanoBuf Person::data() {
   buf.write_field_size(2, sizeof(int32_t));
   buf.append_int32(age);
 
-  buf.write_field_size(3, 4 * numbers.size() + sizeof(int32_t));
-  buf.append_int32(numbers.size());
+  buf.write_field_size(3, 4 * numbers.size());
   for (const auto &item0 : numbers) {
     buf.append_int32(item0);
   }
