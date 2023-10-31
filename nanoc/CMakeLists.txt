@@ -27,6 +27,18 @@ add_executable(nanoc
         src/generator/code_output.cxx
         src/data_type/np_map.cxx
         src/generator/cxx/cxx_map_generator.cxx
+        src/generator/swift/swift_generator.cxx
+        src/generator/swift/swift_bool_generator.cxx
+        src/generator/swift/swift_int8_generator.cxx
+        src/generator/swift/swift_int32_generator.cxx
+        src/generator/swift/swift_string_generator.cxx
+        src/generator/swift/swift_string_generator.hxx
+        src/generator/swift/swift_double_generator.cxx
+        src/generator/swift/swift_double_generator.hxx
+        src/generator/swift/swift_array_generator.cxx
+        src/generator/swift/swift_array_generator.hxx
+        src/generator/swift/swift_map_generator.cxx
+        src/generator/swift/swift_map_generator.hxx
 )
 
 target_link_libraries(nanoc argparse::argparse yaml onetbb::onetbb)

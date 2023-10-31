@@ -101,6 +101,7 @@ void CxxMapGenerator::generate_read_code(CodeOutput &output,
 	<< "}" << std::endl << std::endl;
 	// clang-format on
 }
+
 void CxxMapGenerator::generate_read_code(CodeOutput &output,
 										 const MessageField &field) {
 	generate_read_code(output, field.type.get(), field.field_name + "_map");
