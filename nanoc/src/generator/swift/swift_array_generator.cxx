@@ -2,6 +2,7 @@
 #include "../../data_type/np_array.hxx"
 #include "../../data_type/np_int32.hxx"
 #include "../../data_type/np_int8.hxx"
+#include "../../string_util/case_conv.hxx"
 
 SwiftArrayGenerator::SwiftArrayGenerator(
 	std::shared_ptr<DataTypeCodeGeneratorRegistry> generator_registry)
@@ -33,7 +34,7 @@ SwiftArrayGenerator::get_read_size_expression(NanoPack::DataType *data_type,
 
 void SwiftArrayGenerator::generate_field_declaration(
 	CodeOutput &output, const MessageField &field) {
-	output.stream() << "let " << field.field_name << ": "
+	output.stream() << "let " << snake_to_camel(field.field_name) << ": "
 					<< get_type_declaration(field.type.get()) << std::endl;
 }
 
@@ -41,12 +42,10 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 											 NanoPack::DataType *type,
 											 const std::string &var_name) {
 	const auto array_type = dynamic_cast<NanoPack::Array *>(type);
-	const auto int32_generator = generator_registry->find_generator_for_type(
-		NanoPack::Int32::IDENTIFIER);
 	NanoPack::DataType *item_type = array_type->get_item_type().get();
 	const auto item_type_generator =
 		generator_registry->find_generator_for_type(item_type);
-	if (int32_generator == nullptr || item_type_generator == nullptr) {
+	if (item_type_generator == nullptr) {
 		// TODO: better error handling
 		throw "something";
 	}
@@ -56,15 +55,15 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 
 	// clang-format off
 	output.stream()
-	<< "let " << var_name << "ItemCount = buf.readUnalignedSize(at: ptr)" << std::endl
-	<< "ptr += 4";
+	<< "let " << var_name << "ItemCount = data.readUnalignedSize(at: ptr)" << std::endl
+	<< "ptr += 4" << std::endl;
 	// clang-format on
 
 	if (item_type->is_fixed_size()) {
 		// clang-format off
 		output.stream()
 		<< "let " << var_name << "Size = " << var_name << "ItemCount * " << item_type->size() << std::endl
-		<< "let " << var_name << " = buf[ptr..<ptr + " << var_name << "Size].withUnsafeBytes {" << std::endl
+		<< "let " << var_name << " = data[ptr..<ptr + " << var_name << "Size].withUnsafeBytes {" << std::endl
 		<< get_type_declaration(type) << "($0.bindMemory(to: " << item_type_generator->get_type_declaration(item_type) << ".self)";
 		// clang-format on
 
@@ -97,8 +96,7 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 		// clang-format off
 		output.stream()
 		<< var_name << ".append(" << item_var << ")" << std::endl
-		<< "}" << std::endl
-		<< std::endl;
+		<< "}" << std::endl;
 		// clang-format on
 	}
 }
@@ -107,21 +105,21 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 											 const MessageField &field) {
 	const auto array_type =
 		std::dynamic_pointer_cast<NanoPack::Array>(field.type);
-	const auto int32_generator = generator_registry->find_generator_for_type(
-		NanoPack::Int32::IDENTIFIER);
 	NanoPack::DataType *item_type = array_type->get_item_type().get();
 	const auto item_type_generator =
 		generator_registry->find_generator_for_type(item_type);
-	if (int32_generator == nullptr || item_type_generator == nullptr) {
+	if (item_type_generator == nullptr) {
 		// TODO: better error handling
 		throw "something";
 	}
 
+	const auto field_name_camel = snake_to_camel(field.field_name);
+
 	if (item_type->is_fixed_size()) {
 		// clang-format off
 		output.stream()
-		<< "let " << field.field_name << "Size = buf.readSize(ofField: " << field.field_number << ")" << std::endl
-		<< "self. " << field.field_name << " = buf[ptr..<ptr + " << field.field_name << "Size].withUnsafeBytes {" << std::endl
+		<< "let " << field_name_camel << "Size = data.readSize(ofField: " << field.field_number << ")" << std::endl
+		<< "self." << field_name_camel << " = data[ptr..<ptr + " << field_name_camel << "Size].withUnsafeBytes {" << std::endl
 		<< get_type_declaration(field.type.get()) << "($0.bindMemory(to: " << item_type_generator->get_type_declaration(item_type) << ".self)";
 		// clang-format on
 
@@ -136,11 +134,14 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 		output.stream()
 		<< ")" << std::endl
 		<< "}" << std::endl // withUnsafeBytes
-		<< "ptr += " << field.field_name << "Size" << std::endl
+		<< "ptr += " << field_name_camel << "Size" << std::endl
 		<< std::endl;
 		// clang-format on
 	} else {
-		generate_read_code(output, field.type.get(), field.field_name);
+		generate_read_code(output, field.type.get(), field_name_camel);
+		output.stream() << "self." << field_name_camel << " = "
+						<< field_name_camel << std::endl
+						<< std::endl;
 	}
 }
 
@@ -159,7 +160,7 @@ void SwiftArrayGenerator::generate_write_code(CodeOutput &output,
 	// clang-format off
 	output.stream()
 	// append the number of elements in the vector into the buffer at the write ptr.
-	<< "buf.append_int32(" << var_name << ".count);" << std::endl;
+	<< "data.append(size: " << var_name << ".count);" << std::endl;
 	// clang-format on
 
 	if (!item_type->is_fixed_size()) {
@@ -211,6 +212,8 @@ void SwiftArrayGenerator::generate_write_code(CodeOutput &output,
 		throw "something";
 	}
 
+	const auto field_name_camel = snake_to_camel(field.field_name);
+
 	if (item_type->is_fixed_size()) {
 		// the array has fixed size elements, so the total size of the array
 		// data can be calculated directly:
@@ -226,15 +229,15 @@ void SwiftArrayGenerator::generate_write_code(CodeOutput &output,
 
 		// clang-format off
 		output.stream()
-		<< "buf.write(size: " << item_type->size() << " * " << field.field_name << ".count, ofField: " << field.field_number <<");" << std::endl;
+		<< "data.write(size: " << item_type->size() << " * " << field_name_camel << ".count, ofField: " << field.field_number <<");" << std::endl;
 		// clang-format on
 	} else {
 		// clang-format off
 		output.stream()
 		// declare an accumulator variable to store the total size of the array
-		<< "let " << field.field_name << "TotalByteSize = 4" << std::endl
+		<< "var " << field_name_camel << "TotalByteSize = 4" << std::endl
 		// append number of elements in the array before the actual array data
-		<< "buf.append_int32(" << field.field_name << ".count);" << std::endl;
+		<< "data.append(size: " << field_name_camel << ".count);" << std::endl;
 		// clang-format on
 	}
 
@@ -244,7 +247,7 @@ void SwiftArrayGenerator::generate_write_code(CodeOutput &output,
 		loop_var = "item" + std::to_string(i++);
 	} while (output.is_variable_in_scope(loop_var));
 
-	output.stream() << "for " << loop_var << " in " << field.field_name << "{"
+	output.stream() << "for " << loop_var << " in " << field_name_camel << "{"
 					<< std::endl;
 
 	output.add_variable_to_scope(loop_var);
@@ -255,7 +258,7 @@ void SwiftArrayGenerator::generate_write_code(CodeOutput &output,
 	if (!item_type->is_fixed_size()) {
 		// store the byte size of the raw data of the item into the accumulator
 		// variable declared earlier.
-		output.stream() << field.field_name << "TotalByteSize += "
+		output.stream() << field_name_camel << "TotalByteSize += "
 						<< item_type_generator->get_read_size_expression(
 							   item_type, loop_var)
 						<< std::endl;
@@ -266,7 +269,7 @@ void SwiftArrayGenerator::generate_write_code(CodeOutput &output,
 	if (!item_type->is_fixed_size()) {
 		// write the accumulator variable declared earlier into the size header
 		// for the field
-		output.stream() << "buf.write(fieldSize: " << field.field_name
+		output.stream() << "data.write(size: " << field_name_camel
 						<< "TotalByteSize, ofField: " << field.field_number
 						<< ");" << std::endl
 						<< std::endl;

@@ -3,14 +3,13 @@
 
 #include "../../message_schema.hxx"
 #include "../data_type_code_generator.hxx"
+#include "../generator.hxx"
 #include <map>
 #include <string>
 
-class CxxGenerator {
+class CxxGenerator : public Generator {
   private:
 	std::shared_ptr<DataTypeCodeGeneratorRegistry> data_type_generator_registry;
-
-	std::map<std::string, DataTypeCodeGenerator *> data_type_generators;
 
 	std::shared_ptr<DataTypeCodeGenerator>
 	find_generator_for_field(const MessageField &field);
@@ -24,9 +23,8 @@ class CxxGenerator {
 
   public:
 	CxxGenerator();
-	~CxxGenerator();
 
-	void generate_for_schema(const MessageSchema &schema);
+	void generate_for_schema(const MessageSchema &schema) override;
 };
 
 #endif // NANOPACK_NANOC_CXX_GENERATOR_HXX

@@ -177,13 +177,13 @@ void CxxMapGenerator::generate_write_code(CodeOutput &output,
 		output.stream() << var_name << "_total_size += "
 						<< key_type_generator->get_read_size_expression(
 							   key_type, key_var)
-						<< ";";
+						<< ";" << std::endl;
 	}
 	if (!value_type->is_fixed_size()) {
 		output.stream() << var_name << "_total_size += "
 						<< value_type_generator->get_read_size_expression(
 							   value_type, value_var)
-						<< ";";
+						<< ";" << std::endl;
 	}
 
 	output.stream() << "}" << std::endl << std::endl;

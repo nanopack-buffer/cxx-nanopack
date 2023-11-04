@@ -1,4 +1,6 @@
 #include "generator/cxx/cxx_generator.hxx"
+#include "generator/generator.hxx"
+#include "generator/swift/swift_generator.hxx"
 #include "message_schema.hxx"
 #include "parser/parse_schema.hxx"
 #include <argparse/argparse.hpp>
@@ -45,11 +47,18 @@ int main(int argc, char *argv[]) {
 		t.join();
 	}
 
-	// TODO: should select the appropriate generator based on the language flag
-	CxxGenerator generator;
-	for (const MessageSchema &schema : all_schemas) {
-		generator.generate_for_schema(schema);
+	Generator *generator;
+	if (language == "c++") {
+		generator = new CxxGenerator;
+	} else if (language == "swift") {
+		generator = new SwiftGenerator;
 	}
+
+	for (const MessageSchema &schema : all_schemas) {
+		generator->generate_for_schema(schema);
+	}
+
+	delete generator;
 
 	return 0;
 }

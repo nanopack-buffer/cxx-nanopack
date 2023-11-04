@@ -24,8 +24,7 @@
 const std::filesystem::path HEADER_FILE_EXT(".np.hxx");
 const std::filesystem::path CODE_FILE_EXT(".np.cxx");
 
-CxxGenerator::CxxGenerator()
-	: data_type_generator_registry(), data_type_generators() {
+CxxGenerator::CxxGenerator() : data_type_generator_registry() {
 	data_type_generator_registry =
 		std::make_shared<DataTypeCodeGeneratorRegistry>();
 
@@ -45,12 +44,6 @@ CxxGenerator::CxxGenerator()
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::Map::IDENTIFIER,
 		std::make_shared<CxxMapGenerator>(data_type_generator_registry));
-}
-
-CxxGenerator::~CxxGenerator() {
-	for (auto &data_type_generator : data_type_generators) {
-		delete (data_type_generator.second);
-	}
 }
 
 void CxxGenerator::generate_for_schema(const MessageSchema &schema) {

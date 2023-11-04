@@ -13,6 +13,6 @@ add_library(nanopack
         src/nanobuf/nanobuf.cxx)
 
 # include example targets
-add_subdirectory(examples/simple)
+add_subdirectory(examples/cxx/simple)
 
 target_include_directories(nanopack PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
