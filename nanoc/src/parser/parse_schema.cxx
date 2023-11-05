@@ -7,7 +7,7 @@
 #include <yaml.h>
 
 struct TypeExpression {
-	std::shared_ptr<NanoPack::DataType> data_type;
+	std::unique_ptr<NanoPack::DataType> data_type;
 	int field_number;
 };
 
@@ -37,14 +37,14 @@ parse_type_expression(const std::string &expression) {
 	}
 
 	const std::string type_literal = expression.substr(0, pos);
-	std::shared_ptr<NanoPack::DataType> data_type =
+	std::unique_ptr<NanoPack::DataType> data_type =
 		NanoPack::create_type_from_identifier(type_literal);
 	if (data_type == nullptr) {
 		return std::nullopt;
 	}
 
 	return TypeExpression{
-		.data_type = data_type,
+		.data_type = std::move(data_type),
 		.field_number = static_cast<int>(field_number),
 	};
 }
@@ -146,10 +146,12 @@ std::optional<MessageSchema> parse_schema_file(const std::string &file_path) {
 					break;
 				}
 
+				const std::string data_type_identifier =
+					type_expression->data_type->identifier();
+
 				schema.fields.emplace_back(
-					type_expression->data_type,
-					type_expression->data_type->identifier(), key_name,
-					type_expression->field_number);
+					std::move(type_expression->data_type), data_type_identifier,
+					key_name, type_expression->field_number);
 			}
 			continue;
 		}

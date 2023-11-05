@@ -11,7 +11,7 @@
 
 namespace NanoPack {
 
-std::shared_ptr<NanoPack::DataType>
+std::unique_ptr<NanoPack::DataType>
 create_type_from_identifier(const std::string &identifier);
 
 }

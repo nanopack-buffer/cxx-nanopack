@@ -6,22 +6,22 @@
 #include "np_string.hxx"
 
 // TODO: perhaps set a limit on type nesting level?
-std::shared_ptr<NanoPack::DataType>
+std::unique_ptr<NanoPack::DataType>
 NanoPack::create_type_from_identifier(const std::string &identifier) {
 	if (identifier == NanoPack::Bool::IDENTIFIER) {
-		return std::make_shared<NanoPack::Bool>();
+		return std::make_unique<NanoPack::Bool>();
 	}
 	if (identifier == NanoPack::Int8::IDENTIFIER) {
-		return std::make_shared<NanoPack::Int8>();
+		return std::make_unique<NanoPack::Int8>();
 	}
 	if (identifier == NanoPack::Int32::IDENTIFIER) {
-		return std::make_shared<NanoPack::Int32>();
+		return std::make_unique<NanoPack::Int32>();
 	}
 	if (identifier == NanoPack::Double::IDENTIFIER) {
-		return std::make_shared<NanoPack::Double>();
+		return std::make_unique<NanoPack::Double>();
 	}
 	if (identifier == NanoPack::String::IDENTIFIER) {
-		return std::make_shared<NanoPack::String>();
+		return std::make_unique<NanoPack::String>();
 	}
 
 	const auto array_identifier_pos =
@@ -38,7 +38,8 @@ NanoPack::create_type_from_identifier(const std::string &identifier) {
 
 	const bool unmatched_map_brackets = (map_start_pos == std::string::npos) !=
 										(map_end_pos == std::string::npos);
-	const bool wrong_bracket_pos = map_start_pos != std::string::npos && map_start_pos != 0;
+	const bool wrong_bracket_pos =
+		map_start_pos != std::string::npos && map_start_pos != 0;
 	if (unmatched_map_brackets || wrong_bracket_pos) {
 		return nullptr;
 	}
@@ -48,18 +49,18 @@ NanoPack::create_type_from_identifier(const std::string &identifier) {
 		// which means "array of something"
 		const auto array_type_identifier =
 			identifier.substr(0, array_identifier_pos);
-		const auto array_type =
+		std::unique_ptr<NanoPack::DataType> array_type =
 			create_type_from_identifier(array_type_identifier);
 		if (array_type == nullptr) {
 			return nullptr;
 		}
-		return std::make_shared<NanoPack::Array>(array_type);
+		return std::make_unique<NanoPack::Array>(std::move(array_type));
 	}
 
 	if (map_start_pos != std::string::npos &&
 		map_end_pos != std::string::npos) {
-		const auto map_type_expr =
-			identifier.substr(map_start_pos + 1, map_end_pos - map_start_pos - 1);
+		const auto map_type_expr = identifier.substr(
+			map_start_pos + 1, map_end_pos - map_start_pos - 1);
 		const auto colon_pos = map_type_expr.find(':');
 
 		const bool colon_is_start = colon_pos == 0;
@@ -71,13 +72,16 @@ NanoPack::create_type_from_identifier(const std::string &identifier) {
 
 		const auto key_type_expr = map_type_expr.substr(0, colon_pos);
 		const auto value_type_expr = map_type_expr.substr(colon_pos + 1);
-		const auto key_type = create_type_from_identifier(key_type_expr);
-		const auto value_type = create_type_from_identifier(value_type_expr);
+		std::unique_ptr<NanoPack::DataType> key_type =
+			create_type_from_identifier(key_type_expr);
+		std::unique_ptr<NanoPack::DataType> value_type =
+			create_type_from_identifier(value_type_expr);
 		if (key_type == nullptr || value_type == nullptr) {
 			return nullptr;
 		}
 
-		return std::make_shared<NanoPack::Map>(key_type, value_type);
+		return std::make_unique<NanoPack::Map>(std::move(key_type),
+											   std::move(value_type));
 	}
 
 	// TODO: support message type as type literal
