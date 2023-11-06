@@ -63,11 +63,19 @@ void CxxArrayGenerator::generate_read_code(CodeOutput &output,
 											var_name + "_vec_size");
 	}
 
-	// clang-format off
-	output.stream()
-	// instantiates a new vector with <var_name>_vec_size as the number of elements in the vector
-	<< get_type_declaration(type) << var_name << "(" << var_name << "_vec_size);" << std::endl;
-	// clang-format on
+	// instantiates a new vector with <var_name>_vec_size as the number of
+	// elements in the vector
+	if (output.is_variable_in_scope(var_name)) {
+		// clang-format off
+		output.stream()
+		<< var_name << " = " << get_type_declaration(type) << "(" << var_name << "_vec_size);" << std::endl;
+		// clang-format on
+	} else {
+		// clang-format off
+		output.stream()
+		<< get_type_declaration(type) << var_name << "(" << var_name << "_vec_size);" << std::endl;
+		// clang-format on
+	}
 
 	// finds a name for the loop variable that doesn't clash with existing
 	// variables, because the loop can be nested inside another loop,

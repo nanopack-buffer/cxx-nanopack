@@ -1,40 +1,50 @@
 #include "type_factory.hxx"
-#include "np_array.hxx"
-#include "np_int32.hxx"
-#include "np_int8.hxx"
-#include "np_map.hxx"
-#include "np_string.hxx"
+#include "../data_type/np_array.hxx"
+#include "../data_type/np_int32.hxx"
+#include "../data_type/np_int8.hxx"
+#include "../data_type/np_map.hxx"
+#include "../data_type/np_optional.hxx"
+#include "../data_type/np_string.hxx"
 
 // TODO: perhaps set a limit on type nesting level?
 std::unique_ptr<NanoPack::DataType>
-NanoPack::create_type_from_identifier(const std::string &identifier) {
-	if (identifier == NanoPack::Bool::IDENTIFIER) {
+NanoPack::create_type_from_literal(const std::string &literal) {
+	const char last_char = literal.back();
+	if (last_char == '?') {
+		std::unique_ptr<NanoPack::DataType> value_type =
+			create_type_from_literal(literal.substr(0, literal.length() - 1));
+		if (value_type == nullptr) {
+			return nullptr;
+		}
+		return std::make_unique<NanoPack::Optional>(std::move(value_type));
+	}
+
+	if (literal == NanoPack::Bool::IDENTIFIER) {
 		return std::make_unique<NanoPack::Bool>();
 	}
-	if (identifier == NanoPack::Int8::IDENTIFIER) {
+	if (literal == NanoPack::Int8::IDENTIFIER) {
 		return std::make_unique<NanoPack::Int8>();
 	}
-	if (identifier == NanoPack::Int32::IDENTIFIER) {
+	if (literal == NanoPack::Int32::IDENTIFIER) {
 		return std::make_unique<NanoPack::Int32>();
 	}
-	if (identifier == NanoPack::Double::IDENTIFIER) {
+	if (literal == NanoPack::Double::IDENTIFIER) {
 		return std::make_unique<NanoPack::Double>();
 	}
-	if (identifier == NanoPack::String::IDENTIFIER) {
+	if (literal == NanoPack::String::IDENTIFIER) {
 		return std::make_unique<NanoPack::String>();
 	}
 
 	const auto array_identifier_pos =
-		identifier.rfind(NanoPack::Array::IDENTIFIER);
+		literal.rfind(NanoPack::Array::IDENTIFIER);
 	if (array_identifier_pos == 0) {
 		// array brackets cannot be the start of a type expression
 		return nullptr;
 	}
 
 	const auto map_start_pos =
-		identifier.find(NanoPack::Map::MAP_IDENTIFIER_START);
-	const auto map_end_pos =
-		identifier.rfind(NanoPack::Map::MAP_IDENTIFIER_END);
+		literal.find(NanoPack::Map::MAP_IDENTIFIER_START);
+	const auto map_end_pos = literal.rfind(NanoPack::Map::MAP_IDENTIFIER_END);
 
 	const bool unmatched_map_brackets = (map_start_pos == std::string::npos) !=
 										(map_end_pos == std::string::npos);
@@ -44,13 +54,13 @@ NanoPack::create_type_from_identifier(const std::string &identifier) {
 		return nullptr;
 	}
 
-	if (array_identifier_pos == identifier.length() - 2) {
+	if (array_identifier_pos == literal.length() - 2) {
 		// array bracket is at the end of the type expression
 		// which means "array of something"
 		const auto array_type_identifier =
-			identifier.substr(0, array_identifier_pos);
+			literal.substr(0, array_identifier_pos);
 		std::unique_ptr<NanoPack::DataType> array_type =
-			create_type_from_identifier(array_type_identifier);
+			create_type_from_literal(array_type_identifier);
 		if (array_type == nullptr) {
 			return nullptr;
 		}
@@ -59,8 +69,8 @@ NanoPack::create_type_from_identifier(const std::string &identifier) {
 
 	if (map_start_pos != std::string::npos &&
 		map_end_pos != std::string::npos) {
-		const auto map_type_expr = identifier.substr(
-			map_start_pos + 1, map_end_pos - map_start_pos - 1);
+		const auto map_type_expr =
+			literal.substr(map_start_pos + 1, map_end_pos - map_start_pos - 1);
 		const auto colon_pos = map_type_expr.find(':');
 
 		const bool colon_is_start = colon_pos == 0;
@@ -73,9 +83,9 @@ NanoPack::create_type_from_identifier(const std::string &identifier) {
 		const auto key_type_expr = map_type_expr.substr(0, colon_pos);
 		const auto value_type_expr = map_type_expr.substr(colon_pos + 1);
 		std::unique_ptr<NanoPack::DataType> key_type =
-			create_type_from_identifier(key_type_expr);
+			create_type_from_literal(key_type_expr);
 		std::unique_ptr<NanoPack::DataType> value_type =
-			create_type_from_identifier(value_type_expr);
+			create_type_from_literal(value_type_expr);
 		if (key_type == nullptr || value_type == nullptr) {
 			return nullptr;
 		}

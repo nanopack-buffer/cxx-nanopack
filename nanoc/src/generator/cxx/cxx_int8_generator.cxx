@@ -20,10 +20,15 @@ void CxxInt8Generator::generate_field_declaration(CodeOutput &output,
 void CxxInt8Generator::generate_read_code(CodeOutput &output,
 										  NanoPack::DataType *type,
 										  const std::string &var_name) {
-	// clang-format off
-	// read the int8 value from the current buffer read ptr, then move the read ptr
-	output.stream() << "const " << get_type_declaration(nullptr) << " " << var_name << " = buf.read_int8(ptr++);" << std::endl;
-	// clang-format on
+	if (output.is_variable_in_scope(var_name)) {
+		output.stream() << var_name << " = buf.read_int8(ptr++);" << std::endl;
+	} else {
+		// clang-format off
+		// read the int8 value from the current buffer read ptr, then move the read ptr
+		output.stream()
+		<< "const " << get_type_declaration(nullptr) << " " << var_name << " = buf.read_int8(ptr++);" << std::endl;
+		// clang-format on
+	}
 }
 
 void CxxInt8Generator::generate_read_code(CodeOutput &output,

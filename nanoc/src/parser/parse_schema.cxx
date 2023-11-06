@@ -1,5 +1,5 @@
 #include "parse_schema.hxx"
-#include "../data_type/type_factory.hxx"
+#include "type_factory.hxx"
 #include <filesystem>
 #include <functional>
 #include <memory>
@@ -38,7 +38,7 @@ parse_type_expression(const std::string &expression) {
 
 	const std::string type_literal = expression.substr(0, pos);
 	std::unique_ptr<NanoPack::DataType> data_type =
-		NanoPack::create_type_from_identifier(type_literal);
+		NanoPack::create_type_from_literal(type_literal);
 	if (data_type == nullptr) {
 		return std::nullopt;
 	}

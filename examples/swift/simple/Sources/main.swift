@@ -3,7 +3,9 @@
 
 import NanoPack
 
-let person = Person(firstName: "John", lastName: "Doe", age: 40)
+print("a simple program demonstrating conversion between NanoPack data & Swift struct.")
+
+let person = Person(firstName: "John", middleName: nil, lastName: "Doe", age: 40)
 
 let data = person.data()!
 print("raw bytes: ", terminator: "")
@@ -13,9 +15,10 @@ for b in data {
 print("")
 print("total bytes:", data.count)
 
-print("========================")
-
-let person2 = Person(data: data)!
-print("first name:", person2.firstName)
-print("last name:", person2.lastName)
-print("age:", person2.age)
+let person1 = Person(data: data)!
+print("first name:", person1.firstName)
+print("last name:", person1.lastName)
+print("age:", person1.age)
+if person1.middleName == nil {
+    print("This person does not have a middle name.")
+}

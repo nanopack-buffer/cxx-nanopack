@@ -67,6 +67,8 @@ class NanoBuf {
 	void append_double(double d);
 
 	void print_bytes();
+
+	uint8_t operator[](int i) const;
 };
 
 #endif // NANOPACK_NANOBUF_HXX

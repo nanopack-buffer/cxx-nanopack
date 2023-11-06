@@ -20,11 +20,15 @@ void CxxInt32Generator::generate_field_declaration(CodeOutput &output,
 void CxxInt32Generator::generate_read_code(CodeOutput &output,
 										   NanoPack::DataType *type,
 										   const std::string &var_name) {
-	// clang-format off
-	output.stream()
-	<< "const " << get_type_declaration(nullptr) << " " << var_name << " = buf.read_int32(ptr);" << std::endl
-	<< "ptr += sizeof(int32_t);" << std::endl;
-	// clang-format on
+	if (output.is_variable_in_scope(var_name)) {
+		output.stream() << var_name << " = buf.read_int32(ptr);" << std::endl;
+	} else {
+		// clang-format off
+		output.stream()
+		<< "const " << get_type_declaration(nullptr) << " " << var_name << " = buf.read_int32(ptr);" << std::endl;
+		// clang-format on
+	}
+	output.stream() << "ptr += sizeof(int32_t);" << std::endl;
 }
 
 void CxxInt32Generator::generate_read_code(CodeOutput &output,

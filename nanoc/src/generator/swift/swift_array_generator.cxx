@@ -63,7 +63,7 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 		// clang-format off
 		output.stream()
 		<< "let " << var_name << "Size = " << var_name << "ItemCount * " << item_type->size() << std::endl
-		<< "let " << var_name << " = data[ptr..<ptr + " << var_name << "Size].withUnsafeBytes {" << std::endl
+		<< (output.is_variable_in_scope(var_name) ? "" : "let ") << var_name << " = data[ptr..<ptr + " << var_name << "Size].withUnsafeBytes {" << std::endl
 		<< get_type_declaration(type) << "($0.bindMemory(to: " << item_type_generator->get_type_declaration(item_type) << ".self)";
 		// clang-format on
 
@@ -76,9 +76,13 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 
 		output.stream() << ")" << std::endl << "}" << std::endl << std::endl;
 	} else {
+		if (!output.is_variable_in_scope(var_name)) {
+			output.stream()
+				<< "var " << var_name << ": " << get_type_declaration(type)
+				<< " = []" << std::endl;
+		}
 		// clang-format off
 		output.stream()
-		<< "var " << var_name << ": " << get_type_declaration(type) << " = []" << std::endl
 		<< var_name << ".reserveCapacity(" << var_name << "ItemCount)" << std::endl
 		<< "for _ in 0..<" << var_name << "ItemCount {" << std::endl;
 		// clang-format on

@@ -5,6 +5,7 @@
 #include "../../data_type/np_int32.hxx"
 #include "../../data_type/np_int8.hxx"
 #include "../../data_type/np_map.hxx"
+#include "../../data_type/np_optional.hxx"
 #include "../../data_type/np_string.hxx"
 #include "../../string_util/case_conv.hxx"
 #include "swift_array_generator.hxx"
@@ -13,6 +14,7 @@
 #include "swift_int32_generator.hxx"
 #include "swift_int8_generator.hxx"
 #include "swift_map_generator.hxx"
+#include "swift_optional_generator.hxx"
 #include "swift_string_generator.hxx"
 #include <filesystem>
 #include <fstream>
@@ -39,6 +41,9 @@ SwiftGenerator::SwiftGenerator() : data_type_generator_registry() {
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::Map::IDENTIFIER,
 		std::make_shared<SwiftMapGenerator>(data_type_generator_registry));
+	data_type_generator_registry->add_generator_for_type(
+		NanoPack::Optional::IDENTIFIER,
+		std::make_shared<SwiftOptionalGenerator>(data_type_generator_registry));
 }
 
 void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {

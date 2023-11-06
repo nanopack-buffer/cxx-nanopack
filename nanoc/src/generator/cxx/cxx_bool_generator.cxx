@@ -20,12 +20,17 @@ void CxxBoolGenerator::generate_field_declaration(CodeOutput &output,
 void CxxBoolGenerator::generate_read_code(CodeOutput &output,
 										  NanoPack::DataType *type,
 										  const std::string &var_name) {
-	// clang-format off
-	output.stream()
-	// read boolean value from current buffer read ptr, then move the read ptr
-	<< "const " << get_type_declaration(nullptr) << " " << var_name << " = buf.read_bool(ptr++);" << std::endl
-	<< std::endl;
-	// clang-format on
+	if (output.is_variable_in_scope(var_name)) {
+		output.stream() << var_name << " = buf.read_bool(ptr++);" << std::endl
+						<< std::endl;
+	} else {
+		// clang-format off
+		output.stream()
+		// read boolean value from current buffer read ptr, then move the read ptr
+		<< "const " << get_type_declaration(nullptr) << " " << var_name << " = buf.read_bool(ptr++);" << std::endl
+		<< std::endl;
+		// clang-format on
+	}
 }
 
 void CxxBoolGenerator::generate_read_code(CodeOutput &output,

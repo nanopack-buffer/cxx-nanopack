@@ -64,9 +64,18 @@ void SwiftMapGenerator::generate_read_code(CodeOutput &output,
 	output.stream()
 	// read, at the current read ptr, the number of elements that should be in
 	// the map, and store the number to <var_name>_map_size
-	<< "let " << var_name << "ItemCount = data.readUnalignedSize(at: ptr)" << std::endl
-	<< "var " << var_name << ": " << get_type_declaration(type) << " = [:]" << std::endl
-	<< var_name << ".reserveCapacity(" << var_name << "ItemCount)" << std::endl;
+	<< "let " << var_name << "ItemCount = data.readUnalignedSize(at: ptr)" << std::endl;
+	// clang-format on
+
+	if (!output.is_variable_in_scope(var_name)) {
+		// clang-format off
+		output.stream()
+		<< "var " << var_name << ": " << get_type_declaration(type) << " = [:]" << std::endl;
+		// clang-format on
+	}
+
+	// clang-format off
+	output.stream() << var_name << ".reserveCapacity(" << var_name << "ItemCount)" << std::endl;
 	// clang-format on
 
 	// finds a name for the loop variable that doesn't clash with existing

@@ -21,11 +21,16 @@ void SwiftInt32Generator::generate_field_declaration(
 void SwiftInt32Generator::generate_read_code(CodeOutput &output,
 											 NanoPack::DataType *type,
 											 const std::string &var_name) {
-	// clang-format off
-	output.stream()
-	<< "let " << var_name << ": " << get_type_declaration(type) << " = data.readUnaligned(at: ptr)" << std::endl
-	<< "ptr += 4" << std::endl;
-	// clang-format on
+	if (output.is_variable_in_scope(var_name)) {
+		output.stream() << var_name << " = data.readUnaligned(at: ptr)"
+						<< std::endl;
+	} else {
+		// clang-format off
+		output.stream()
+		<< "let " << var_name << ": " << get_type_declaration(type) << " = data.readUnaligned(at: ptr)" << std::endl;
+		// clang-format on
+	}
+	output.stream() << "ptr += 4" << std::endl;
 }
 
 void SwiftInt32Generator::generate_read_code(CodeOutput &output,

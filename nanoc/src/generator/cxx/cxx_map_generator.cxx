@@ -68,12 +68,21 @@ void CxxMapGenerator::generate_read_code(CodeOutput &output,
 	int32_generator->generate_read_code(output, nullptr,
 										var_name + "_map_size");
 
-	// clang-format off
-	output.stream()
-	// instantiates a new map with <var_name>_vec_size as the number of elements in the map
-	<< get_type_declaration(type) << var_name << ";" << std::endl
-	<< var_name << ".reserve(" << var_name << "_map_size);" << std::endl;
-	// clang-format on
+	if (output.is_variable_in_scope(var_name)) {
+		// clang-format off
+		output.stream()
+		<< var_name << " = " << get_type_declaration(type) << "()";
+		// clang-format on
+	} else {
+		// clang-format off
+		output.stream()
+		// instantiates a new map with <var_name>_vec_size as the number of elements in the map
+		<< get_type_declaration(type) << var_name << ";" << std::endl;
+		// clang-format on
+	}
+
+	output.stream() << var_name << ".reserve(" << var_name << "_map_size);"
+					<< std::endl;
 
 	// finds a name for the loop variable that doesn't clash with existing
 	// variables, because the loop can be nested inside another loop,

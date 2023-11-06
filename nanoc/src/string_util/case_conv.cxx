@@ -18,6 +18,22 @@ std::string camel_to_snake(const std::string &camel) {
 	return snake.str();
 }
 
+std::string pascal_to_screaming(const std::string &camel) {
+	std::stringstream ss;
+	ss << camel[0];
+
+	const size_t len = camel.length();
+	for (int i = 1; i < len; i++) {
+		const char ch = camel[i];
+		if (isupper(ch)) {
+			ss << "_";
+		}
+		ss << (char)toupper(ch);
+	}
+
+	return ss.str();
+}
+
 std::string snake_to_camel(const std::string &snake) {
 	std::stringstream camel;
 

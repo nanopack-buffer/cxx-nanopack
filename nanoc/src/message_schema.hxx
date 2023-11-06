@@ -23,6 +23,8 @@ struct MessageField {
 
 	MessageField(std::shared_ptr<NanoPack::DataType> type, std::string typeName,
 				 std::string fieldName, int fieldNumber);
+
+	MessageField(const MessageField &other) = default;
 };
 
 /**

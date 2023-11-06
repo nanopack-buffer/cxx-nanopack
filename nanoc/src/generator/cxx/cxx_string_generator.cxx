@@ -27,7 +27,7 @@ void CxxStringGenerator::generate_read_code(CodeOutput &output,
 	// move read ptr
 	<< "ptr += sizeof(int32_t);" << std::endl
 	// read string from buffer into var_name
-	<< get_type_declaration(nullptr) << " " << var_name << " = buf.read_string(ptr, " << var_name << "_size);" << std::endl
+	<< (output.is_variable_in_scope(var_name) ? "" : get_type_declaration(nullptr) + " ") << var_name << " = buf.read_string(ptr, " << var_name << "_size);" << std::endl
 	// move read ptr
 	<< "ptr += " << var_name << "_size;" << std::endl;
 	// clang-format on

@@ -5,6 +5,7 @@ import NanoPack
 
 struct Person {
   let firstName: String
+  let middleName: String?
   let lastName: String
   let age: Int32
 }
@@ -17,7 +18,7 @@ extension Person {
       return nil
     }
 
-    var ptr = 16
+    var ptr = 20
 
     let firstNameSize = data.readSize(ofField: 0)
     guard let firstName = data.read(at: ptr, withLength: firstNameSize) else {
@@ -26,7 +27,19 @@ extension Person {
     ptr += firstNameSize
     self.firstName = firstName
 
-    let lastNameSize = data.readSize(ofField: 1)
+    if data.readSize(ofField: 1) < 0 {
+      self.middleName = nil
+    } else {
+      let middleNameSize = data.readSize(ofField: 1)
+      guard let middleName = data.read(at: ptr, withLength: middleNameSize) else {
+        return nil
+      }
+      ptr += middleNameSize
+      self.middleName = middleName
+
+    }
+
+    let lastNameSize = data.readSize(ofField: 2)
     guard let lastName = data.read(at: ptr, withLength: lastNameSize) else {
       return nil
     }
@@ -41,21 +54,29 @@ extension Person {
 
   func data() -> Data? {
     var data = Data()
-    data.reserveCapacity(16)
+    data.reserveCapacity(20)
 
     withUnsafeBytes(of: Person.typeID) {
       data.append(contentsOf: $0)
     }
 
-    data.append([0], count: 12)
+    data.append([0], count: 16)
 
     data.write(size: firstName.lengthOfBytes(using: .utf8), ofField: 0)
     data.append(string: firstName)
 
-    data.write(size: lastName.lengthOfBytes(using: .utf8), ofField: 1)
+    if let middleName = self.middleName {
+      data.write(size: middleName.lengthOfBytes(using: .utf8), ofField: 1)
+      data.append(string: middleName)
+
+    } else {
+      data.write(size: -1, ofField: 1)
+    }
+
+    data.write(size: lastName.lengthOfBytes(using: .utf8), ofField: 2)
     data.append(string: lastName)
 
-    data.write(size: 4, ofField: 2)
+    data.write(size: 4, ofField: 3)
     data.append(int: age.littleEndian)
 
     return data

@@ -20,11 +20,18 @@ void SwiftDoubleGenerator::generate_field_declaration(
 void SwiftDoubleGenerator::generate_read_code(CodeOutput &output,
 											  NanoPack::DataType *type,
 											  const std::string &var_name) {
-	// clang-format off
-	output.stream()
-	<< "let " << var_name << ": " << get_type_declaration(type) << " = data.read(at: ptr)" << std::endl
-	<< "ptr += 8" << std::endl;
-	// clang-format on
+	if (output.is_variable_in_scope(var_name)) {
+		// clang-format off
+		output.stream()
+		<< var_name << " = data.read(at: ptr)" << std::endl;
+		// clang-format on
+	} else {
+		// clang-format off
+		output.stream()
+		<< "let " << var_name << ": " << get_type_declaration(type) << " = data.read(at: ptr)" << std::endl;
+		// clang-format on
+	}
+	output.stream() << "ptr += 8" << std::endl;
 }
 
 void SwiftDoubleGenerator::generate_read_code(CodeOutput &output,

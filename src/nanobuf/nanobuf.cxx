@@ -21,16 +21,36 @@ std::string NanoBuf::read_string(int offset, int32_t size) {
 }
 
 int8_t NanoBuf::read_int8(int offset) {
-	return static_cast<int8_t>(buf.at(offset));
+	const uint8_t b = buf.at(offset);
+	const uint8_t sign_bit = b & (1 << 7);
+	const bool number_is_positive = sign_bit == 0;
+	if (number_is_positive)
+		return static_cast<int8_t>(b);
+	return -((~b) + 1);
 }
 
 int32_t NanoBuf::read_int32(int offset) {
 	int32_t num = 0;
-	num |= static_cast<uint8_t>(buf.at(offset));
-	num |= static_cast<uint8_t>(buf.at(offset + 1) << 8);
-	num |= static_cast<uint8_t>(buf.at(offset + 2) << 16);
-	num |= static_cast<uint8_t>(buf.at(offset + 3) << 24);
-	return num;
+	if constexpr (std::endian::native == std::endian::big) {
+		num |= static_cast<uint8_t>(buf.at(offset)) << 24;
+		num |= static_cast<uint8_t>(buf.at(offset + 1)) << 16;
+		num |= static_cast<uint8_t>(buf.at(offset + 2)) << 8;
+		num |= static_cast<uint8_t>(buf.at(offset + 3));
+	} else if constexpr (std::endian::native == std::endian::little) {
+		num |= static_cast<uint8_t>(buf.at(offset));
+		num |= static_cast<uint8_t>(buf.at(offset + 1)) << 8;
+		num |= static_cast<uint8_t>(buf.at(offset + 2)) << 16;
+		num |= static_cast<uint8_t>(buf.at(offset + 3)) << 24;
+	} else {
+		throw "host has unsupported endianness.";
+	}
+
+	const uint8_t last_byte = buf.at(offset + 3);
+	const uint8_t sign_bit = last_byte & (1 << 7);
+	const bool number_is_positive = sign_bit == 0;
+	if (number_is_positive)
+		return num;
+	return -((~num) + 1);
 }
 
 bool NanoBuf::read_bool(int offset) { return buf.at(offset) == 1; }
@@ -83,3 +103,5 @@ void NanoBuf::print_bytes() {
 	}
 	std::cout << std::endl;
 }
+
+uint8_t NanoBuf::operator[](int i) const { return buf[i]; }

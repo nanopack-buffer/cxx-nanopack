@@ -5,6 +5,7 @@
 #include "../../data_type/np_int32.hxx"
 #include "../../data_type/np_int8.hxx"
 #include "../../data_type/np_map.hxx"
+#include "../../data_type/np_optional.hxx"
 #include "../../data_type/np_string.hxx"
 #include "../../string_util/case_conv.hxx"
 #include "cxx_array_generator.hxx"
@@ -13,6 +14,7 @@
 #include "cxx_int32_generator.hxx"
 #include "cxx_int8_generator.hxx"
 #include "cxx_map_generator.hxx"
+#include "cxx_optional_generator.hxx"
 #include "cxx_string_generator.hxx"
 #include <filesystem>
 #include <fstream>
@@ -44,6 +46,9 @@ CxxGenerator::CxxGenerator() : data_type_generator_registry() {
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::Map::IDENTIFIER,
 		std::make_shared<CxxMapGenerator>(data_type_generator_registry));
+	data_type_generator_registry->add_generator_for_type(
+		NanoPack::Optional::IDENTIFIER,
+		std::make_shared<CxxOptionalGenerator>(data_type_generator_registry));
 }
 
 void CxxGenerator::generate_for_schema(const MessageSchema &schema) {
@@ -63,11 +68,9 @@ std::string CxxGenerator::generate_header_file(const MessageSchema &schema) {
 	std::filesystem::path output_path(schema.schema_path);
 	output_path.replace_extension(HEADER_FILE_EXT);
 
-	std::stringstream ss;
 	// TODO: this doesn't work with namespaced message names
-	ss << "__" << schema.message_name << "_NP_H__";
-
-	std::string include_guard_name = ss.str();
+	const std::string include_guard_name =
+		pascal_to_screaming(schema.message_name) + "_NP_HXX";
 
 	output_file_stream.open(output_path);
 
@@ -88,6 +91,9 @@ std::string CxxGenerator::generate_header_file(const MessageSchema &schema) {
 
 	if (required_types.contains(NanoPack::String::IDENTIFIER)) {
 		output_file.stream() << "#include <string>" << std::endl;
+	}
+	if (required_types.contains(NanoPack::Optional::IDENTIFIER)) {
+		output_file.stream() << "#include <optional>" << std::endl;
 	}
 	// TODO: implement support for including custom message types
 
