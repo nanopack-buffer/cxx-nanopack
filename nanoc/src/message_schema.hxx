@@ -36,6 +36,8 @@ struct MessageSchema {
 	 */
 	std::filesystem::path schema_path;
 
+	std::vector<std::shared_ptr<MessageSchema>> imported_messages;
+
 	/**
 	 * The name of the top level message defined in the schema.
 	 */

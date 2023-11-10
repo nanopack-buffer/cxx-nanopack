@@ -3,16 +3,17 @@
 #include "generator/swift/swift_generator.hxx"
 #include "message_schema.hxx"
 #include "parser/parse_schema.hxx"
+#include "resolver/resolve_schemas.hxx"
 #include <argparse/argparse.hpp>
 #include <iostream>
-#include <oneapi/tbb/concurrent_vector.h>
+#include <oneapi/tbb/concurrent_unordered_map.h>
 #include <optional>
 #include <string>
 #include <thread>
 #include <vector>
 
 int main(int argc, char *argv[]) {
-	argparse::ArgumentParser program("nanopack");
+	argparse::ArgumentParser program("nanoc");
 
 	program.add_argument("input_files")
 		.nargs(argparse::nargs_pattern::at_least_one);
@@ -31,14 +32,17 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	oneapi::tbb::concurrent_vector<MessageSchema> all_schemas;
+	oneapi::tbb::concurrent_unordered_map<std::string, ParseResult>
+		all_parse_results;
 	std::vector<std::thread> threads;
 	for (const std::string &input_file_path : input_files) {
-		threads.emplace_back([&all_schemas, input_file_path]() {
-			std::optional<MessageSchema> schema =
+		threads.emplace_back([&all_parse_results, input_file_path]() {
+			std::optional<ParseResult> parse_result =
 				parse_schema_file(input_file_path);
-			if (schema.has_value()) {
-				all_schemas.emplace_back(schema.value());
+			if (parse_result.has_value()) {
+				all_parse_results.insert(
+					{parse_result->partial_schema->message_name,
+					 parse_result.value()});
 			}
 		});
 	}
@@ -54,6 +58,7 @@ int main(int argc, char *argv[]) {
 		generator = new SwiftGenerator;
 	}
 
+	std::vector<MessageSchema> all_schemas = resolve_schemas(all_parse_results);
 	for (const MessageSchema &schema : all_schemas) {
 		generator->generate_for_schema(schema);
 	}

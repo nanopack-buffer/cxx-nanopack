@@ -3,6 +3,7 @@
 #include "../data_type/np_int32.hxx"
 #include "../data_type/np_int8.hxx"
 #include "../data_type/np_map.hxx"
+#include "../data_type/np_message.hxx"
 #include "../data_type/np_optional.hxx"
 #include "../data_type/np_string.hxx"
 
@@ -33,6 +34,9 @@ NanoPack::create_type_from_literal(const std::string &literal) {
 	}
 	if (literal == NanoPack::String::IDENTIFIER) {
 		return std::make_unique<NanoPack::String>();
+	}
+	if (literal == NanoPack::GenericMessage::IDENTIFIER) {
+		return std::make_unique<NanoPack::GenericMessage>();
 	}
 
 	const auto array_identifier_pos =
@@ -94,6 +98,5 @@ NanoPack::create_type_from_literal(const std::string &literal) {
 											   std::move(value_type));
 	}
 
-	// TODO: support message type as type literal
-	return nullptr;
+	return std::make_unique<NanoPack::Message>(literal);
 }

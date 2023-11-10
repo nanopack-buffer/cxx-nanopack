@@ -49,7 +49,7 @@ parse_type_expression(const std::string &expression) {
 	};
 }
 
-std::optional<MessageSchema> parse_schema_file(const std::string &file_path) {
+std::optional<ParseResult> parse_schema_file(const std::string &file_path) {
 	yaml_parser_t parser;
 	if (!yaml_parser_initialize(&parser)) {
 		return std::nullopt;
@@ -62,10 +62,10 @@ std::optional<MessageSchema> parse_schema_file(const std::string &file_path) {
 
 	yaml_parser_set_input_file(&parser, fh);
 
-	MessageSchema schema{
-		.schema_path = std::filesystem::path(file_path),
-		.type_id = -1,
-	};
+	ParseResult parse_result;
+	auto schema = std::make_shared<MessageSchema>();
+	schema->schema_path = std::filesystem::path(file_path);
+	schema->type_id = -1;
 	yaml_token_t token;
 	int i = 0;
 	bool parse_failed = false;
@@ -91,7 +91,7 @@ std::optional<MessageSchema> parse_schema_file(const std::string &file_path) {
 		}
 
 		if ((i == 3 && token.type == YAML_SCALAR_TOKEN)) {
-			schema.message_name =
+			schema->message_name =
 				std::string(reinterpret_cast<char *>(token.data.scalar.value),
 							token.data.scalar.length);
 			i++;
@@ -131,7 +131,7 @@ std::optional<MessageSchema> parse_schema_file(const std::string &file_path) {
 					break;
 				}
 
-				schema.type_id = type_id;
+				schema->type_id = type_id;
 			} else {
 				// field declaration encountered, treat current token as
 				// type of the field
@@ -146,12 +146,19 @@ std::optional<MessageSchema> parse_schema_file(const std::string &file_path) {
 					break;
 				}
 
-				const std::string data_type_identifier =
-					type_expression->data_type->identifier();
+				std::shared_ptr<NanoPack::DataType> declared_type =
+					std::move(type_expression->data_type);
 
-				schema.fields.emplace_back(
-					std::move(type_expression->data_type), data_type_identifier,
-					key_name, type_expression->field_number);
+				if (declared_type->is_user_defined()) {
+					parse_result.unresolved_types.emplace_back(declared_type);
+				}
+
+				const std::string data_type_identifier =
+					declared_type->identifier();
+
+				schema->fields.emplace_back(declared_type, data_type_identifier,
+											key_name,
+											type_expression->field_number);
 			}
 			continue;
 		}
@@ -167,10 +174,12 @@ std::optional<MessageSchema> parse_schema_file(const std::string &file_path) {
 		return std::nullopt;
 
 	// sort fields by field number in asc order
-	std::sort(schema.fields.begin(), schema.fields.end(),
+	std::sort(schema->fields.begin(), schema->fields.end(),
 			  [](const MessageField &field_a, const MessageField &field_b) {
 				  return field_a.field_number < field_b.field_number;
 			  });
 
-	return schema;
+	parse_result.partial_schema = std::move(schema);
+
+	return parse_result;
 }

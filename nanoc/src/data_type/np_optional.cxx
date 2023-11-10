@@ -9,6 +9,8 @@ std::string NanoPack::Optional::identifier() {
 
 bool NanoPack::Optional::is_fixed_size() { return false; }
 
+bool NanoPack::Optional::is_user_defined() { return false; }
+
 NanoPack::Size NanoPack::Optional::size() {
 	return NanoPack::DataType::DYNAMIC_SIZE;
 }

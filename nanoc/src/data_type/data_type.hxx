@@ -26,6 +26,8 @@ class DataType {
 	 */
 	virtual bool is_fixed_size() = 0;
 
+	virtual bool is_user_defined() = 0;
+
 	/**
 	 * @return The size in bytes this data type takes in the buffer, or DataType::DYNAMIC_SIZE if this data type has a dynamic size.
 	 */

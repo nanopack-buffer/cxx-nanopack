@@ -1,6 +1,7 @@
 #ifndef NANOPACK_NANOC_CODE_OUTPUT_STREAM_HXX
 #define NANOPACK_NANOC_CODE_OUTPUT_STREAM_HXX
 
+#include "../message_schema.hxx"
 #include "iostream"
 #include "memory"
 #include <unordered_set>
@@ -12,6 +13,7 @@
 class CodeOutput {
   private:
 	std::ostream &ostream;
+	const MessageSchema &message_schema;
 	std::unordered_set<std::string> variables_in_scope;
 
   public:
@@ -21,12 +23,14 @@ class CodeOutput {
 	 *
 	 * @param ostream the existing ostream.
 	 */
-	CodeOutput(std::ostream &ostream);
+	CodeOutput(std::ostream &ostream, const MessageSchema &message_schema);
 
 	/**
 	 * @return The ostream that code should be printed to.
 	 */
 	std::ostream &stream();
+
+	const MessageSchema &get_message_schema();
 
 	void add_variable_to_scope(const std::string &var_name);
 

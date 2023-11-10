@@ -13,6 +13,8 @@ class String : public DataType {
 
 	bool is_fixed_size() override;
 
+	bool is_user_defined() override;
+
 	Size size() override;
 };
 

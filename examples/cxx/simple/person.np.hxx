@@ -3,30 +3,28 @@
 #ifndef PERSON_NP_HXX
 #define PERSON_NP_HXX
 
-#include <nanopack/nanobuf.hxx>
 #include <optional>
 #include <string>
+#include <vector>
 
 struct Person {
 private:
-  static const int FIELD_COUNT = 4;
+  static const int FIELD_COUNT = 5;
 
 public:
   static const int32_t TYPE_ID = 1;
 
   std::string first_name;
-
   std::optional<std::string> middle_name;
-
   std::string last_name;
-
   int32_t age;
+  std::shared_ptr<Person> other_friend;
 
   Person();
 
-  explicit Person(std::vector<uint8_t> &data);
+  Person(std::vector<uint8_t>::const_iterator begin, int &bytes_read);
 
-  NanoBuf data();
+  std::vector<uint8_t> data();
 };
 
 #endif

@@ -1,61 +1,80 @@
 #include "person.np.hxx"
+#include <nanopack/reader.hxx>
+#include <nanopack/writer.hxx>
 
 Person::Person() {}
 
-Person::Person(std::vector<uint8_t> &data) {
-  NanoBuf buf(data);
-  int ptr = 20;
+Person::Person(std::vector<uint8_t>::const_iterator begin, int &bytes_read) {
+  NanoPack::Reader reader(begin);
+  int ptr = 24;
 
-  const int32_t type_id = buf.read_type_id();
+  const int32_t type_id = reader.read_type_id();
   if (type_id != Person::TYPE_ID) {
     throw "incompatible type";
   }
 
-  const int32_t first_name_size = buf.read_field_size(0);
-  std::string first_name = buf.read_string(ptr, first_name_size);
+  const int32_t first_name_size = reader.read_field_size(0);
+  first_name = reader.read_string(ptr, first_name_size);
   ptr += first_name_size;
-  this->first_name = first_name;
 
-  if (buf.read_field_size(1) < 0) {
+  if (reader.read_field_size(1) < 0) {
     this->middle_name = std::nullopt;
   } else {
-    const int32_t middle_name_size = buf.read_field_size(1);
-    std::string middle_name = buf.read_string(ptr, middle_name_size);
+    const int32_t middle_name_size = reader.read_field_size(1);
+    middle_name = reader.read_string(ptr, middle_name_size);
     ptr += middle_name_size;
-    this->middle_name = middle_name;
   }
 
-  const int32_t last_name_size = buf.read_field_size(2);
-  std::string last_name = buf.read_string(ptr, last_name_size);
+  const int32_t last_name_size = reader.read_field_size(2);
+  last_name = reader.read_string(ptr, last_name_size);
   ptr += last_name_size;
-  this->last_name = last_name;
 
-  const int32_t age = buf.read_int32(ptr);
+  const int32_t age = reader.read_int32(ptr);
   ptr += sizeof(int32_t);
   this->age = age;
+
+  if (reader.read_field_size(4) < 0) {
+    other_friend = nullptr;
+  } else {
+    int other_friend_bytes_read = 0;
+    other_friend =
+        std::make_shared<Person>(begin + ptr, other_friend_bytes_read);
+    ptr += other_friend_bytes_read;
+  }
+
+  bytes_read = ptr;
 }
 
-NanoBuf Person::data() {
-  NanoBuf buf(sizeof(int32_t) * 5);
+std::vector<uint8_t> Person::data() {
+  std::vector<uint8_t> buf(sizeof(int32_t) * 6);
+  NanoPack::Writer writer(&buf);
 
-  buf.write_type_id(Person::TYPE_ID);
+  writer.write_type_id(Person::TYPE_ID);
 
-  buf.write_field_size(0, first_name.size());
-  buf.append_string(first_name);
+  writer.write_field_size(0, first_name.size());
+  writer.append_string(first_name);
 
   if (middle_name.has_value()) {
     auto middle_name = this->middle_name.value();
-    buf.write_field_size(1, middle_name.size());
-    buf.append_string(middle_name);
+    writer.write_field_size(1, middle_name.size());
+    writer.append_string(middle_name);
   } else {
-    buf.write_field_size(1, -1);
+    writer.write_field_size(1, -1);
   }
 
-  buf.write_field_size(2, last_name.size());
-  buf.append_string(last_name);
+  writer.write_field_size(2, last_name.size());
+  writer.append_string(last_name);
 
-  buf.write_field_size(3, sizeof(int32_t));
-  buf.append_int32(age);
+  writer.write_field_size(3, sizeof(int32_t));
+  writer.append_int32(age);
+
+  if (other_friend != nullptr) {
+    const std::vector<uint8_t> other_friend_data = other_friend->data();
+    writer.append_bytes(other_friend_data);
+    writer.write_field_size(4, other_friend_data.size());
+  } else {
+    writer.write_field_size(4, -1);
+  }
 
   return buf;
 }

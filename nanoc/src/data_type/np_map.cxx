@@ -8,6 +8,8 @@ std::string NanoPack::Map::identifier() { return NanoPack::Map::IDENTIFIER; }
 
 bool NanoPack::Map::is_fixed_size() { return false; }
 
+bool NanoPack::Map::is_user_defined() { return false; }
+
 NanoPack::Size NanoPack::Map::size() {
 	return NanoPack::DataType::DYNAMIC_SIZE;
 }

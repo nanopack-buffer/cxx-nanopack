@@ -14,6 +14,7 @@
 #include "cxx_int32_generator.hxx"
 #include "cxx_int8_generator.hxx"
 #include "cxx_map_generator.hxx"
+#include "cxx_message_generator.hxx"
 #include "cxx_optional_generator.hxx"
 #include "cxx_string_generator.hxx"
 #include <filesystem>
@@ -26,7 +27,10 @@
 const std::filesystem::path HEADER_FILE_EXT(".np.hxx");
 const std::filesystem::path CODE_FILE_EXT(".np.cxx");
 
-CxxGenerator::CxxGenerator() : data_type_generator_registry() {
+CxxGenerator::CxxGenerator()
+	: user_defined_message_type_generator(
+		  std::make_shared<CxxMessageGenerator>()),
+	  data_type_generator_registry() {
 	data_type_generator_registry =
 		std::make_shared<DataTypeCodeGeneratorRegistry>();
 
@@ -58,13 +62,17 @@ void CxxGenerator::generate_for_schema(const MessageSchema &schema) {
 
 std::shared_ptr<DataTypeCodeGenerator>
 CxxGenerator::find_generator_for_field(const MessageField &field) {
-	return data_type_generator_registry->find_generator_for_type(
-		field.type.get());
+	std::shared_ptr<DataTypeCodeGenerator> generator =
+		data_type_generator_registry->find_generator_for_type(field.type.get());
+	if (generator == nullptr) {
+		return user_defined_message_type_generator;
+	}
+	return generator;
 }
 
 std::string CxxGenerator::generate_header_file(const MessageSchema &schema) {
 	std::ofstream output_file_stream;
-	CodeOutput output_file(output_file_stream);
+	CodeOutput output_file(output_file_stream, schema);
 	std::filesystem::path output_path(schema.schema_path);
 	output_path.replace_extension(HEADER_FILE_EXT);
 
@@ -86,7 +94,7 @@ std::string CxxGenerator::generate_header_file(const MessageSchema &schema) {
 	<< "#ifndef " << include_guard_name << std::endl
 	<< "#define " << include_guard_name << std::endl
 	<< std::endl
-	<< "#include <nanopack/nanobuf.hxx>" << std::endl;
+	<< "#include <vector>" << std::endl;
 	// clang-format on
 
 	if (required_types.contains(NanoPack::String::IDENTIFIER)) {
@@ -94,6 +102,9 @@ std::string CxxGenerator::generate_header_file(const MessageSchema &schema) {
 	}
 	if (required_types.contains(NanoPack::Optional::IDENTIFIER)) {
 		output_file.stream() << "#include <optional>" << std::endl;
+	}
+	if (required_types.contains(NanoPack::Map::IDENTIFIER)) {
+		output_file.stream() << "#include <unordered_map>" << std::endl;
 	}
 	// TODO: implement support for including custom message types
 
@@ -113,19 +124,19 @@ std::string CxxGenerator::generate_header_file(const MessageSchema &schema) {
 		std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator != nullptr) {
-
 			generator->generate_field_declaration(output_file, field);
-			output_file.stream() << std::endl;
 		}
 	}
 
 	// clang-format off
 	output_file.stream()
+	<< std::endl
+	<< std::endl
 	<< "  " << schema.message_name << "();" << std::endl
 	<< std::endl
-	<< "  explicit " << schema.message_name << "(std::vector<uint8_t> &data);" << std::endl
+	<< "  " << schema.message_name << "(std::vector<uint8_t>::const_iterator begin, int &bytes_read);" << std::endl
 	<< std::endl
-	<< "  NanoBuf data();" << std::endl
+	<< "  std::vector<uint8_t> data();" << std::endl
 	<< "};" << std::endl
 	<< std::endl
 	<< "#endif" << std::endl;
@@ -141,7 +152,7 @@ std::string CxxGenerator::generate_header_file(const MessageSchema &schema) {
 void CxxGenerator::generate_code_file(const MessageSchema &schema,
 									  const std::string &header_file_name) {
 	std::ofstream output_file_stream;
-	CodeOutput output_file(output_file_stream);
+	CodeOutput output_file(output_file_stream, schema);
 	std::filesystem::path output_path(schema.schema_path);
 	output_path.replace_extension(CODE_FILE_EXT);
 
@@ -150,14 +161,16 @@ void CxxGenerator::generate_code_file(const MessageSchema &schema,
 	// clang-format off
 	output_file_stream
 	<< "#include \"" << header_file_name << "\"" << std::endl
+	<< "#include <nanopack/reader.hxx>" << std::endl
+	<< "#include <nanopack/writer.hxx>" << std::endl
 	<< std::endl
 	<< schema.message_name << "::" << schema.message_name << "() {}" << std::endl
 	<< std::endl
-	<< schema.message_name << "::" << schema.message_name << "(std::vector<uint8_t> &data) {" << std::endl
-	<< "NanoBuf buf(data);" << std::endl
+	<< schema.message_name << "::" << schema.message_name << "(std::vector<uint8_t>::const_iterator begin, int &bytes_read) {" << std::endl
+	<< "NanoPack::Reader reader(begin);" << std::endl
 	<< "int ptr = " << 4 * (schema.fields.size() + 1) << ";" << std::endl
 	<< std::endl
-	<< "const int32_t type_id = buf.read_type_id();" << std::endl
+	<< "const int32_t type_id = reader.read_type_id();" << std::endl
 	<< "if (type_id != " << schema.message_name << "::TYPE_ID) {" << std::endl
 	<< "  throw \"incompatible type\";" << std::endl
 	<< "}" << std::endl
@@ -180,14 +193,20 @@ void CxxGenerator::generate_code_file(const MessageSchema &schema,
 		output_file_stream << std::endl;
 	}
 
-	output_file_stream << "}" << std::endl << std::endl;
+	// clang-format off
+	output_file_stream
+	<< "  bytes_read = ptr;"
+	<< "}" << std::endl
+	<< std::endl;
+	// clang-format on
 
 	// clang-format off
 	output_file_stream
-	<< "NanoBuf " << schema.message_name << "::data() {" << std::endl
-	<< "NanoBuf buf(sizeof(int32_t) * " << schema.fields.size() + 1 << ");" << std::endl
+	<< "std::vector<uint8_t> " << schema.message_name << "::data() {" << std::endl
+	<< "std::vector<uint8_t> buf(sizeof(int32_t) * " << schema.fields.size() + 1 << ");"
+	<< "NanoPack::Writer writer(&buf);" << std::endl
 	<< std::endl
-	<< "buf.write_type_id(" << schema.message_name << "::TYPE_ID);" << std::endl
+	<< "writer.write_type_id(" << schema.message_name << "::TYPE_ID);" << std::endl
 	<< std::endl;
 	// clang-format on
 

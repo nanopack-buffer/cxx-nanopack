@@ -10,7 +10,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_subdirectory(nanoc)
 
 add_library(nanopack
-        src/nanobuf/nanobuf.cxx)
+        include/nanopack/reader.hxx
+        src/reader.cxx
+        src/writer.cxx)
 
 # include example targets
 add_subdirectory(examples/cxx/simple)

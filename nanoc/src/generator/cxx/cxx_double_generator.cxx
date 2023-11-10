@@ -23,12 +23,12 @@ void CxxDoubleGenerator::generate_read_code(CodeOutput &output,
 	if (output.is_variable_in_scope(var_name)) {
 		// clang-format off
 		output.stream()
-		<< var_name << " = buf.read_double(ptr);" << std::endl;
+		<< var_name << " = reader.read_double(ptr);" << std::endl;
 		// clang-format on
 	} else {
 		// clang-format off
 		output.stream()
-		<< "const " << get_type_declaration(nullptr) << " " << var_name << " = buf.read_double(ptr);" << std::endl;
+		<< "const " << get_type_declaration(nullptr) << " " << var_name << " = reader.read_double(ptr);" << std::endl;
 		// clang-format on
 	}
 	output.stream() << "ptr += sizeof(double);" << std::endl << std::endl;
@@ -50,7 +50,7 @@ void CxxDoubleGenerator::generate_write_code(CodeOutput &output,
 											 const std::string &var_name) {
 	// clang-format off
 	output.stream()
-	<< "buf.append_double(" << var_name << ");" << std::endl;
+	<< "writer.append_double(" << var_name << ");" << std::endl;
 	// clang-format on
 }
 
@@ -59,9 +59,9 @@ void CxxDoubleGenerator::generate_write_code(CodeOutput &output,
 	// clang-format off
 	output.stream()
 	// write the size of double to the size header
-	<< "buf.write_field_size(" << field.field_number << ", sizeof(double));" << std::endl
+	<< "writer.write_field_size(" << field.field_number << ", sizeof(double));" << std::endl
 	// append the double value to the end of the buffer
-	<< "  buf.append_double(" << field.field_name << ");" << std::endl
+	<< "  writer.append_double(" << field.field_name << ");" << std::endl
 	<< std::endl;
 	// clang-format on
 }

@@ -136,7 +136,7 @@ void CxxMapGenerator::generate_write_code(CodeOutput &output,
 	// clang-format off
 	output.stream()
 	// append the number of elements in the vector into the buffer at the write ptr.
-	<< "buf.append_int32(" << var_name << ".size());" << std::endl;
+	<< "writer.append_int32(" << var_name << ".size());" << std::endl;
 	// clang-format on
 
 	if (!key_type->is_fixed_size() || !value_type->is_fixed_size()) {
@@ -207,7 +207,7 @@ void CxxMapGenerator::generate_write_code(CodeOutput &output,
 		map_type->get_value_type();
 
 	if (key_type->is_fixed_size() && value_type->is_fixed_size()) {
-		output.stream() << "buf.write_field_size(" << field.field_number << ", "
+		output.stream() << "writer.write_field_size(" << field.field_number << ", "
 						<< field.field_name << ".size() * ("
 						<< std::to_string(key_type->size()) << " + "
 						<< std::to_string(value_type->size()) << "))";
@@ -216,7 +216,7 @@ void CxxMapGenerator::generate_write_code(CodeOutput &output,
 	generate_write_code(output, field.type.get(), field.field_name);
 
 	if (!key_type->is_fixed_size() || !value_type->is_fixed_size()) {
-		output.stream() << "buf.write_field_size(" << field.field_number << ", "
+		output.stream() << "writer.write_field_size(" << field.field_number << ", "
 						<< field.field_name << "_total_size);" << std::endl;
 	}
 }

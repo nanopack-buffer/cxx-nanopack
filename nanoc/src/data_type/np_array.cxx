@@ -7,6 +7,8 @@ std::string NanoPack::Array::identifier() { return IDENTIFIER; }
 
 bool NanoPack::Array::is_fixed_size() { return false; }
 
+bool NanoPack::Array::is_user_defined() { return false; }
+
 NanoPack::Size NanoPack::Array::size() { return DYNAMIC_SIZE; }
 
 std::shared_ptr<NanoPack::DataType> NanoPack::Array::get_item_type() {

@@ -116,18 +116,22 @@ class DataTypeCodeGeneratorRegistry {
 						   std::shared_ptr<DataTypeCodeGenerator> generator);
 
 	/**
-	 * Finds the generator that is responsible for generating code of the given type.
+	 * Finds the generator that is responsible for generating code of the given
+	 * type.
 	 *
-	 * @return A shared pointer to the instance of DataTypeCodeGenerator that can generate code for the data type, or nullptr if none is found.
+	 * @return A shared pointer to the instance of DataTypeCodeGenerator that
+	 * can generate code for the data type, or nullptr if none is found.
 	 */
 	std::shared_ptr<DataTypeCodeGenerator>
 	find_generator_for_type(NanoPack::DataType *data_type);
 
 	/**
-	 * Finds the generator that is responsible for generating code of the given type.
+	 * Finds the generator that is responsible for generating code of the given
+	 * type.
 	 *
 	 * @param type_identifier The identifier of the data type interested.
-	 * @return A shared pointer to the instance of DataTypeCodeGenerator that can generate code for the data type, or nullptr if none is found.
+	 * @return A shared pointer to the instance of DataTypeCodeGenerator that
+	 * can generate code for the data type, or nullptr if none is found.
 	 */
 	std::shared_ptr<DataTypeCodeGenerator>
 	find_generator_for_type(std::string type_identifier);

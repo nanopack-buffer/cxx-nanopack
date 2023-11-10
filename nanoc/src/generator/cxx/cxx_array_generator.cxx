@@ -118,7 +118,7 @@ void CxxArrayGenerator::generate_read_code(CodeOutput &output,
 
 		// clang-format off
 		output.stream()
-		<< "const int32_t " << field.field_name << "_size = buf.read_field_size(" << field.field_number << ");" << std::endl
+		<< "const int32_t " << field.field_name << "_size = reader.read_field_size(" << field.field_number << ");" << std::endl
 		<< "const int32_t " << field.field_name << "_vec_vec_size = " << field.field_name << "_size / " << array_type->get_item_type()->size() << ";" << std::endl;
 		// clang-format on
 	}
@@ -143,7 +143,7 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 	// clang-format off
 	output.stream()
 	// append the number of elements in the vector into the buffer at the write ptr.
-	<< "buf.append_int32(" << var_name << ".size());" << std::endl;
+	<< "writer.append_int32(" << var_name << ".size());" << std::endl;
 	// clang-format on
 
 	if (!item_type->is_fixed_size()) {
@@ -210,7 +210,7 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 
 		// clang-format off
 		output.stream()
-		<< "buf.write_field_size(" << field.field_number << ", " << item_type->size() << " * " << field.field_name << ".size());" << std::endl;
+		<< "writer.write_field_size(" << field.field_number << ", " << item_type->size() << " * " << field.field_name << ".size());" << std::endl;
 		// clang-format on
 	} else {
 		// clang-format off
@@ -218,7 +218,7 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 		// declare an accumulator variable to store the total size of the array
 		<< "int32_t " << field.field_name << "_total_size = sizeof(int32_t);" << std::endl
 		// append number of elements in the array before the actual array data
-		<< "buf.append_int32(" << field.field_name << ".size());" << std::endl;
+		<< "writer.append_int32(" << field.field_name << ".size());" << std::endl;
 		// clang-format on
 	}
 
@@ -252,8 +252,9 @@ void CxxArrayGenerator::generate_write_code(CodeOutput &output,
 	if (!item_type->is_fixed_size()) {
 		// write the accumulator variable declared earlier into the size header
 		// for the field
-		output.stream() << "buf.write_field_size(" << field.field_number << ", "
-						<< field.field_name << "_total_size);" << std::endl
+		output.stream() << "writer.write_field_size(" << field.field_number
+						<< ", " << field.field_name << "_total_size);"
+						<< std::endl
 						<< std::endl;
 	}
 }

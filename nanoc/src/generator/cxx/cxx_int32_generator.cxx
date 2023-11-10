@@ -21,11 +21,11 @@ void CxxInt32Generator::generate_read_code(CodeOutput &output,
 										   NanoPack::DataType *type,
 										   const std::string &var_name) {
 	if (output.is_variable_in_scope(var_name)) {
-		output.stream() << var_name << " = buf.read_int32(ptr);" << std::endl;
+		output.stream() << var_name << " = reader.read_int32(ptr);" << std::endl;
 	} else {
 		// clang-format off
 		output.stream()
-		<< "const " << get_type_declaration(nullptr) << " " << var_name << " = buf.read_int32(ptr);" << std::endl;
+		<< "const " << get_type_declaration(nullptr) << " " << var_name << " = reader.read_int32(ptr);" << std::endl;
 		// clang-format on
 	}
 	output.stream() << "ptr += sizeof(int32_t);" << std::endl;
@@ -47,7 +47,7 @@ void CxxInt32Generator::generate_write_code(CodeOutput &output,
 											const std::string &var_name) {
 	// clang-format off
 	output.stream()
-	<< "buf.append_int32(" << var_name << ");" << std::endl;
+	<< "writer.append_int32(" << var_name << ");" << std::endl;
 	// clang-format on
 }
 
@@ -56,9 +56,9 @@ void CxxInt32Generator::generate_write_code(CodeOutput &output,
 	// clang-format off
 	output.stream()
 	// write the size of int32 to the size header
-	<< "buf.write_field_size(" << field.field_number << ", sizeof(int32_t));" << std::endl
+	<< "writer.write_field_size(" << field.field_number << ", sizeof(int32_t));" << std::endl
 	// append the int32 value to the end of the buffer
-	<< "buf.append_int32(" << field.field_name << ");" << std::endl
+	<< "writer.append_int32(" << field.field_name << ");" << std::endl
 	<< std::endl;
 	// clang-format on
 }

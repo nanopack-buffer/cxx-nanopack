@@ -87,7 +87,7 @@ void CxxOptionalGenerator::generate_read_code(CodeOutput &output,
 
 	// clang-format off
 	output.stream()
-	<< "if (buf.read_field_size(" << field.field_number << ") < 0) {" << std::endl
+	<< "if (reader.read_field_size(" << field.field_number << ") < 0) {" << std::endl
 	<< "    this->" << field.field_name << " = std::nullopt;" << std::endl
 	<< "} else {" << std::endl;
 	// clang-format on
@@ -115,12 +115,12 @@ void CxxOptionalGenerator::generate_write_code(CodeOutput &output,
 	// clang-format off
 	output.stream()
 	<< "if (" << var_name << ".has_value()) {" << std::endl
-	<< "    buf.append_int8(1);" << std::endl
+	<< "    writer.append_int8(1);" << std::endl
 	<< "    auto " << var_name << "_value = " << var_name << ".value();" << std::endl;
 			value_type_generator->generate_write_code(output, value_type.get(), var_name + "_value");
 	output.stream()
 	<< "} else {" << std::endl
-	<< "    buf.append_int8(0);" << std::endl
+	<< "    writer.append_int8(0);" << std::endl
 	<< "}";
 	// clang-format on
 }
@@ -151,7 +151,7 @@ void CxxOptionalGenerator::generate_write_code(CodeOutput &output,
 	// clang-format off
 	output.stream()
 	<< "} else {" << std::endl
-	<< "    buf.write_field_size(" << field.field_number << ", -1);" << std::endl
+	<< "    writer.write_field_size(" << field.field_number << ", -1);" << std::endl
 	<< "}" << std::endl
 	<< std::endl;
 	// clang-format on

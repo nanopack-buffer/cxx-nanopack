@@ -48,7 +48,7 @@ SwiftGenerator::SwiftGenerator() : data_type_generator_registry() {
 
 void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 	std::ofstream output_file_stream;
-	CodeOutput code_output(output_file_stream);
+	CodeOutput code_output(output_file_stream, schema);
 	std::filesystem::path output_path(schema.schema_path);
 	output_path.replace_filename(snake_to_pascal(output_path.filename()))
 		.replace_extension(CODE_FILE_EXT);
