@@ -76,6 +76,8 @@ std::string CxxGenerator::generate_header_file(const MessageSchema &schema) {
 	std::filesystem::path output_path(schema.schema_path);
 	output_path.replace_extension(HEADER_FILE_EXT);
 
+	const size_t last_field_index = schema.fields.size() - 1;
+
 	// TODO: this doesn't work with namespaced message names
 	const std::string include_guard_name =
 		pascal_to_screaming(schema.message_name) + "_NP_HXX";
@@ -132,8 +134,29 @@ std::string CxxGenerator::generate_header_file(const MessageSchema &schema) {
 	output_file.stream()
 	<< std::endl
 	<< std::endl
+	// empty constructor definition
 	<< "  " << schema.message_name << "();" << std::endl
-	<< std::endl
+	<< std::endl;
+	// clang-format on
+
+	// constructor with field init params
+	output_file.stream() << "  " << schema.message_name << "(";
+	size_t i = 0;
+	for (const MessageField &field : schema.fields) {
+		std::shared_ptr<DataTypeCodeGenerator> generator =
+			find_generator_for_field(field);
+		if (generator != nullptr) {
+			generator->generate_constructor_parameter(output_file, field);
+			if (i < last_field_index) {
+				output_file.stream() << ", ";
+			}
+		}
+		i++;
+	}
+	output_file.stream() << ");" << std::endl << std::endl;
+
+	// clang-format off
+	output_file.stream()
 	<< "  " << schema.message_name << "(std::vector<uint8_t>::const_iterator begin, int &bytes_read);" << std::endl
 	<< std::endl
 	<< "  std::vector<uint8_t> data();" << std::endl
@@ -159,13 +182,53 @@ void CxxGenerator::generate_code_file(const MessageSchema &schema,
 	output_file_stream.open(output_path);
 
 	// clang-format off
-	output_file_stream
+	output_file.stream()
 	<< "#include \"" << header_file_name << "\"" << std::endl
 	<< "#include <nanopack/reader.hxx>" << std::endl
 	<< "#include <nanopack/writer.hxx>" << std::endl
 	<< std::endl
 	<< schema.message_name << "::" << schema.message_name << "() {}" << std::endl
-	<< std::endl
+	<< std::endl;
+	// clang-format on
+
+	const size_t last_field_index = schema.fields.size() - 1;
+
+	output_file.stream() << schema.message_name << "::" << schema.message_name
+						 << "(";
+	{
+		size_t i = 0;
+		for (const MessageField &field : schema.fields) {
+			std::shared_ptr<DataTypeCodeGenerator> generator =
+				find_generator_for_field(field);
+			if (generator != nullptr) {
+				generator->generate_constructor_parameter(output_file, field);
+				if (i < last_field_index) {
+					output_file.stream() << ", ";
+				}
+			}
+			i++;
+		}
+	}
+	output_file.stream() << ") : ";
+	{
+		size_t i = 0;
+		for (const MessageField &field : schema.fields) {
+			std::shared_ptr<DataTypeCodeGenerator> generator =
+				find_generator_for_field(field);
+			if (generator != nullptr) {
+				generator->generate_constructor_field_initializer(output_file,
+																  field);
+				if (i < last_field_index) {
+					output_file.stream() << ", ";
+				}
+			}
+			i++;
+		}
+	}
+	output_file.stream() << " {}" << std::endl << std::endl;
+
+	// clang-format off
+	output_file.stream()
 	<< schema.message_name << "::" << schema.message_name << "(std::vector<uint8_t>::const_iterator begin, int &bytes_read) {" << std::endl
 	<< "NanoPack::Reader reader(begin);" << std::endl
 	<< "int ptr = " << 4 * (schema.fields.size() + 1) << ";" << std::endl

@@ -11,6 +11,16 @@ CxxInt8Generator::get_read_size_expression(NanoPack::DataType *data_type,
 	return "sizeof(int8)";
 }
 
+void CxxInt8Generator::generate_constructor_parameter(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << "int8_t " << field.field_name;
+}
+
+void CxxInt8Generator::generate_constructor_field_initializer(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << field.field_name << "(" << field.field_name << ")";
+}
+
 void CxxInt8Generator::generate_field_declaration(CodeOutput &output,
 												  const MessageField &field) {
 	output.stream() << get_type_declaration(nullptr) << " " << field.field_name
@@ -21,7 +31,8 @@ void CxxInt8Generator::generate_read_code(CodeOutput &output,
 										  NanoPack::DataType *type,
 										  const std::string &var_name) {
 	if (output.is_variable_in_scope(var_name)) {
-		output.stream() << var_name << " = reader.read_int8(ptr++);" << std::endl;
+		output.stream() << var_name << " = reader.read_int8(ptr++);"
+						<< std::endl;
 	} else {
 		// clang-format off
 		// read the int8 value from the current buffer read ptr, then move the read ptr

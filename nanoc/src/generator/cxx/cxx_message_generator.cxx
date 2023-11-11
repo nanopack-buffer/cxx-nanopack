@@ -13,6 +13,32 @@ CxxMessageGenerator::get_read_size_expression(NanoPack::DataType *data_type,
 	return var_name + "_data.size()";
 }
 
+void CxxMessageGenerator::generate_constructor_parameter(
+	CodeOutput &output, const MessageField &field) {
+	std::string message_type_name = field.type->identifier();
+	bool is_self_referencing =
+		message_type_name == output.get_message_schema().message_name;
+	if (is_self_referencing) {
+		output.stream() << "std::shared_ptr<" << message_type_name << ">"
+						<< field.field_name;
+	} else {
+		output.stream() << message_type_name << " &" << field.field_name;
+	}
+}
+
+void CxxMessageGenerator::generate_constructor_field_initializer(
+	CodeOutput &output, const MessageField &field) {
+	std::string message_type_name = field.type->identifier();
+	bool is_self_referencing =
+		message_type_name == output.get_message_schema().message_name;
+	if (is_self_referencing) {
+		output.stream() << field.field_name << "(std::move(" << field.field_name
+						<< "))";
+	} else {
+		output.stream() << field.field_name << "(" << field.field_name << ")";
+	}
+}
+
 void CxxMessageGenerator::generate_field_declaration(
 	CodeOutput &output, const MessageField &field) {
 	std::string message_type_name = field.type->identifier();

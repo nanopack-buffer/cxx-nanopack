@@ -38,6 +38,18 @@ CxxMapGenerator::get_read_size_expression(NanoPack::DataType *data_type,
 	return var_name + "_total_size";
 }
 
+void CxxMapGenerator::generate_constructor_parameter(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << get_type_declaration(field.type.get()) << " "
+					<< field.field_name;
+}
+
+void CxxMapGenerator::generate_constructor_field_initializer(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << field.field_name << "(std::move(" << field.field_name
+					<< "))";
+}
+
 void CxxMapGenerator::generate_field_declaration(CodeOutput &output,
 												 const MessageField &field) {
 	output.stream() << get_type_declaration(field.type.get()) << " "
@@ -207,8 +219,8 @@ void CxxMapGenerator::generate_write_code(CodeOutput &output,
 		map_type->get_value_type();
 
 	if (key_type->is_fixed_size() && value_type->is_fixed_size()) {
-		output.stream() << "writer.write_field_size(" << field.field_number << ", "
-						<< field.field_name << ".size() * ("
+		output.stream() << "writer.write_field_size(" << field.field_number
+						<< ", " << field.field_name << ".size() * ("
 						<< std::to_string(key_type->size()) << " + "
 						<< std::to_string(value_type->size()) << "))";
 	}
@@ -216,7 +228,8 @@ void CxxMapGenerator::generate_write_code(CodeOutput &output,
 	generate_write_code(output, field.type.get(), field.field_name);
 
 	if (!key_type->is_fixed_size() || !value_type->is_fixed_size()) {
-		output.stream() << "writer.write_field_size(" << field.field_number << ", "
-						<< field.field_name << "_total_size);" << std::endl;
+		output.stream() << "writer.write_field_size(" << field.field_number
+						<< ", " << field.field_name << "_total_size);"
+						<< std::endl;
 	}
 }

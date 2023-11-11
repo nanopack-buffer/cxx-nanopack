@@ -3,22 +3,28 @@
 import Foundation
 import NanoPack
 
-struct Person {
+class Person {
   let firstName: String
   let middleName: String?
   let lastName: String
   let age: Int32
-}
-
-extension Person {
+  let otherFriend: Person?
   public static let typeID: Int32 = 1
+
+  init(firstName: String, middleName: String?, lastName: String, age: Int32, otherFriend: Person) {
+    self.firstName = firstName
+    self.middleName = middleName
+    self.lastName = lastName
+    self.age = age
+    self.otherFriend = otherFriend
+  }
 
   init?(data: Data) {
     guard data.readTypeID() == Person.typeID else {
       return nil
     }
 
-    var ptr = 20
+    var ptr = 24
 
     let firstNameSize = data.readSize(ofField: 0)
     guard let firstName = data.read(at: ptr, withLength: firstNameSize) else {
@@ -50,17 +56,24 @@ extension Person {
     ptr += 4
     self.age = age
 
+    let otherFriendSize = data.readSize(ofField: 4)
+    if otherFriendSize < 0 {
+      otherFriend = nil
+    } else {
+      otherFriend = Person(data: data.subdata(in: ptr..<ptr + otherFriendSize))
+    }
+
   }
 
   func data() -> Data? {
     var data = Data()
-    data.reserveCapacity(20)
+    data.reserveCapacity(24)
 
     withUnsafeBytes(of: Person.typeID) {
       data.append(contentsOf: $0)
     }
 
-    data.append([0], count: 16)
+    data.append([0], count: 20)
 
     data.write(size: firstName.lengthOfBytes(using: .utf8), ofField: 0)
     data.append(string: firstName)
@@ -78,6 +91,13 @@ extension Person {
 
     data.write(size: 4, ofField: 3)
     data.append(int: age.littleEndian)
+
+    if let otherFriend = self.otherFriend, let otherFriendData = otherFriend.data() {
+      data.append(otherFriendData)
+      data.write(size: otherFriendData.count, ofField: 4)
+    } else {
+      data.write(size: -1, ofField: 4)
+    }
 
     return data
   }

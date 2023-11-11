@@ -1,9 +1,10 @@
-#ifndef NANOPACK_NANOC_CXX_BOOL_GENERATOR_HXX
-#define NANOPACK_NANOC_CXX_BOOL_GENERATOR_HXX
+#ifndef NANOPACK_NANOC_SWIFT_MESSAGE_GENERATOR_HXX
+#define NANOPACK_NANOC_SWIFT_MESSAGE_GENERATOR_HXX
 
 #include "../data_type_code_generator.hxx"
+#include <memory>
 
-class CxxBoolGenerator : public DataTypeCodeGenerator {
+class SwiftMessageGenerator : public DataTypeCodeGenerator {
   public:
 	std::string get_type_declaration(NanoPack::DataType *data_type) override;
 
@@ -33,4 +34,4 @@ class CxxBoolGenerator : public DataTypeCodeGenerator {
 							 const MessageField &field) override;
 };
 
-#endif // NANOPACK_NANOC_CXX_BOOL_GENERATOR_HXX
+#endif // NANOPACK_NANOC_SWIFT_MESSAGE_GENERATOR_HXX

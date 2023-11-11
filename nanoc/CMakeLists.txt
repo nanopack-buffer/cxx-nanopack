@@ -53,6 +53,8 @@ add_executable(nanoc
         src/parser/parse_result.hxx
         src/generator/cxx/cxx_message_generator.cxx
         src/generator/cxx/cxx_message_generator.hxx
+        src/generator/swift/swift_message_generator.cxx
+        src/generator/swift/swift_message_generator.hxx
 )
 
 target_link_libraries(nanoc argparse::argparse yaml onetbb::onetbb)

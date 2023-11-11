@@ -36,6 +36,18 @@ CxxArrayGenerator::get_read_size_expression(NanoPack::DataType *data_type,
 	return var_name + "_total_size";
 }
 
+void CxxArrayGenerator::generate_constructor_parameter(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << get_type_declaration(field.type.get()) << " "
+					<< field.field_name;
+}
+
+void CxxArrayGenerator::generate_constructor_field_initializer(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << field.field_name << "(std::move(" << field.field_name
+					<< "))";
+}
+
 void CxxArrayGenerator::generate_field_declaration(CodeOutput &output,
 												   const MessageField &field) {
 	output.stream() << get_type_declaration(field.type.get())

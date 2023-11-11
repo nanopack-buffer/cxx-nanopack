@@ -4,6 +4,13 @@
 
 Person::Person() {}
 
+Person::Person(std::string first_name, std::optional<std::string> middle_name,
+               std::string last_name, int32_t age,
+               std::shared_ptr<Person> other_friend)
+    : first_name(std::move(first_name)), middle_name(middle_name),
+      last_name(std::move(last_name)), age(age),
+      other_friend(std::move(other_friend)) {}
+
 Person::Person(std::vector<uint8_t>::const_iterator begin, int &bytes_read) {
   NanoPack::Reader reader(begin);
   int ptr = 24;

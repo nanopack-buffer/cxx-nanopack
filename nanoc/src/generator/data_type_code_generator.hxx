@@ -29,6 +29,13 @@ class DataTypeCodeGenerator {
 	get_read_size_expression(NanoPack::DataType *data_type,
 							 const std::string &var_name) = 0;
 
+	virtual void generate_constructor_parameter(CodeOutput &output,
+												const MessageField &field) = 0;
+
+	virtual void
+	generate_constructor_field_initializer(CodeOutput &output,
+										   const MessageField &field) = 0;
+
 	/**
 	 * Generates language-specific declaration (e.g. a C++ class field.) for the
 	 * given NanoPack message field,

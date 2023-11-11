@@ -11,6 +11,16 @@ CxxInt32Generator::get_read_size_expression(NanoPack::DataType *data_type,
 	return "sizeof(int32_t)";
 }
 
+void CxxInt32Generator::generate_constructor_parameter(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << "int32_t " << field.field_name;
+}
+
+void CxxInt32Generator::generate_constructor_field_initializer(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << field.field_name << "(" << field.field_name << ")";
+}
+
 void CxxInt32Generator::generate_field_declaration(CodeOutput &output,
 												   const MessageField &field) {
 	output.stream() << get_type_declaration(nullptr) << " " << field.field_name
@@ -21,7 +31,8 @@ void CxxInt32Generator::generate_read_code(CodeOutput &output,
 										   NanoPack::DataType *type,
 										   const std::string &var_name) {
 	if (output.is_variable_in_scope(var_name)) {
-		output.stream() << var_name << " = reader.read_int32(ptr);" << std::endl;
+		output.stream() << var_name << " = reader.read_int32(ptr);"
+						<< std::endl;
 	} else {
 		// clang-format off
 		output.stream()

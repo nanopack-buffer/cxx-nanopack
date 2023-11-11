@@ -38,6 +38,19 @@ SwiftMapGenerator::get_read_size_expression(NanoPack::DataType *data_type,
 	return var_name + "TotalByteSize";
 }
 
+void SwiftMapGenerator::generate_constructor_parameter(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << snake_to_camel(field.field_name) << ": "
+					<< get_type_declaration(field.type.get());
+}
+
+void SwiftMapGenerator::generate_constructor_field_initializer(
+	CodeOutput &output, const MessageField &field) {
+	const std::string field_name_camel_case = snake_to_camel(field.field_name);
+	output.stream() << "self." << field_name_camel_case << " = "
+					<< field_name_camel_case;
+}
+
 void SwiftMapGenerator::generate_field_declaration(CodeOutput &output,
 												   const MessageField &field) {
 	output.stream() << "let " << snake_to_camel(field.field_name) << ": "

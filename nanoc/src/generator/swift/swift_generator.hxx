@@ -5,6 +5,7 @@
 
 class SwiftGenerator : public Generator {
   private:
+	std::shared_ptr<DataTypeCodeGenerator> user_defined_message_type_generator;
 	std::shared_ptr<DataTypeCodeGeneratorRegistry> data_type_generator_registry;
 
 	std::shared_ptr<DataTypeCodeGenerator>

@@ -11,6 +11,16 @@ CxxDoubleGenerator::get_read_size_expression(NanoPack::DataType *data_type,
 	return "sizeof(double)";
 }
 
+void CxxDoubleGenerator::generate_constructor_parameter(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << "double " << field.field_name;
+}
+
+void CxxDoubleGenerator::generate_constructor_field_initializer(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << field.field_name << "(" << field.field_name << ")";
+}
+
 void CxxDoubleGenerator::generate_field_declaration(CodeOutput &output,
 													const MessageField &field) {
 	output.stream() << get_type_declaration(nullptr) << " " << field.field_name

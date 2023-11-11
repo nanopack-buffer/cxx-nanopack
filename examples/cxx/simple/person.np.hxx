@@ -22,6 +22,10 @@ public:
 
   Person();
 
+  Person(std::string first_name, std::optional<std::string> middle_name,
+         std::string last_name, int32_t age,
+         std::shared_ptr<Person> other_friend);
+
   Person(std::vector<uint8_t>::const_iterator begin, int &bytes_read);
 
   std::vector<uint8_t> data();

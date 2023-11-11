@@ -38,6 +38,17 @@ CxxOptionalGenerator::get_read_size_expression(NanoPack::DataType *data_type,
 		   " : 1";
 }
 
+void CxxOptionalGenerator::generate_constructor_parameter(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << get_type_declaration(field.type.get()) << " "
+					<< field.field_name;
+}
+
+void CxxOptionalGenerator::generate_constructor_field_initializer(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << field.field_name << "(" << field.field_name << ")";
+}
+
 void CxxOptionalGenerator::generate_field_declaration(
 	CodeOutput &output, const MessageField &field) {
 	output.stream() << get_type_declaration(field.type.get())

@@ -11,6 +11,17 @@ CxxStringGenerator::get_read_size_expression(NanoPack::DataType *data_type,
 	return var_name + ".size() + sizeof(int32_t)";
 }
 
+void CxxStringGenerator::generate_constructor_parameter(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << "std::string " << field.field_name;
+}
+
+void CxxStringGenerator::generate_constructor_field_initializer(
+	CodeOutput &output, const MessageField &field) {
+	output.stream() << field.field_name << "(std::move(" << field.field_name
+					<< "))";
+}
+
 void CxxStringGenerator::generate_field_declaration(CodeOutput &output,
 													const MessageField &field) {
 	output.stream() << get_type_declaration(nullptr) << " " << field.field_name
