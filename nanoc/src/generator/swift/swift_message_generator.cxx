@@ -44,9 +44,8 @@ void SwiftMessageGenerator::generate_read_code(CodeOutput &output,
 											   const std::string &var_name) {
 	// clang-format off
 	output.stream()
-	<< "let " << var_name << "Size = data.readUnalignedSize(at: ptr)" << std::endl
-	<< "ptr += 4" << std::endl
-	<< "guard let " << var_name << " = " << type->identifier() << "(data: data.subdata(in: ptr..<ptr + " << var_name << "Size) else {" << std::endl
+	<< "var " << var_name << "Size = 0" << std::endl
+	<< "guard let " << var_name << " = " << type->identifier() << "(data: data[ptr...], size: &" << var_name << "Size) else {" << std::endl
 	<< "    return nil" << std::endl
 	<< "}" << std::endl
 	<< "ptr += " << var_name << "Size" << std::endl;
@@ -71,13 +70,13 @@ void SwiftMessageGenerator::generate_read_code(CodeOutput &output,
 		<< "if " << field_name_camel_case << "Size < 0 {" << std::endl
 		<< "    " << field_name_camel_case << " = nil" << std::endl
 		<< "} else {" << std::endl
-		<< "    " << field_name_camel_case << " = " << field.type->identifier() << "(data: data.subdata(in: ptr..<ptr + " << field_name_camel_case << "Size))" << std::endl
+		<< "    " << field_name_camel_case << " = " << field.type->identifier() << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size])" << std::endl
 		<< "}" << std::endl;
 		// clang-format on
 	} else {
 		// clang-format off
 		output.stream()
-		<< field_name_camel_case << " = " << field.type->identifier() << "(data: data.subdata(in: ptr..<ptr + " << field_name_camel_case << "Size))" << std::endl;
+		<< field_name_camel_case << " = " << field.type->identifier() << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size])" << std::endl;
 		// clang-format on
 	}
 }

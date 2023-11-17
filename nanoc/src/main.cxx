@@ -1,6 +1,7 @@
 #include "generator/cxx/cxx_generator.hxx"
 #include "generator/generator.hxx"
 #include "generator/swift/swift_generator.hxx"
+#include "generator/ts/ts_generator.hxx"
 #include "message_schema.hxx"
 #include "parser/parse_schema.hxx"
 #include "resolver/resolve_schemas.hxx"
@@ -56,6 +57,11 @@ int main(int argc, char *argv[]) {
 		generator = new CxxGenerator;
 	} else if (language == "swift") {
 		generator = new SwiftGenerator;
+	} else if (language == "ts") {
+		generator = new TsGenerator;
+	} else {
+		std::cerr << "Unsupported language: " << language << std::endl;
+		return -1;
 	}
 
 	std::vector<MessageSchema> all_schemas = resolve_schemas(all_parse_results);

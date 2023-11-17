@@ -11,4 +11,6 @@ std::string snake_to_camel(const std::string &snake);
 
 std::string snake_to_pascal(const std::string &snake);
 
+std::string snake_to_kebab(const std::string &snake);
+
 #endif // NANOPACK_NANOC_CASE_CONV_HXX

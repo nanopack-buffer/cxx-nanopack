@@ -12,7 +12,8 @@ add_subdirectory(nanoc)
 add_library(nanopack
         include/nanopack/reader.hxx
         src/reader.cxx
-        src/writer.cxx)
+        src/writer.cxx
+        src/message_stream.cxx)
 
 # include example targets
 add_subdirectory(examples/cxx/simple)

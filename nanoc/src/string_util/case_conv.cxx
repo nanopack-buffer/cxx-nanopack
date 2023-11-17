@@ -70,3 +70,15 @@ std::string snake_to_pascal(const std::string &snake) {
 
 	return camel.str();
 }
+
+std::string snake_to_kebab(const std::string &snake) {
+	std::stringstream kebab;
+	for (const char &ch : snake) {
+		if (ch == '_') {
+			kebab << '-';
+		} else {
+			kebab << ch;
+		}
+	}
+	return kebab.str();
+}

@@ -55,6 +55,24 @@ add_executable(nanoc
         src/generator/cxx/cxx_message_generator.hxx
         src/generator/swift/swift_message_generator.cxx
         src/generator/swift/swift_message_generator.hxx
+        src/generator/ts/ts_generator.cxx
+        src/generator/ts/ts_generator.hxx
+        src/generator/ts/ts_int8_generator.cxx
+        src/generator/ts/ts_int8_generator.hxx
+        src/generator/ts/ts_int32_generator.cxx
+        src/generator/ts/ts_int32_generator.hxx
+        src/generator/ts/ts_bool_generator.cxx
+        src/generator/ts/ts_bool_generator.hxx
+        src/generator/ts/ts_string_generator.cxx
+        src/generator/ts/ts_string_generator.hxx
+        src/generator/ts/ts_array_generator.cxx
+        src/generator/ts/ts_array_generator.hxx
+        src/generator/ts/ts_map_generator.cxx
+        src/generator/ts/ts_map_generator.hxx
+        src/generator/ts/ts_optional_generator.cxx
+        src/generator/ts/ts_optional_generator.hxx
+        src/generator/ts/ts_message_generator.cxx
+        src/generator/ts/ts_message_generator.hxx
 )
 
 target_link_libraries(nanoc argparse::argparse yaml onetbb::onetbb)
