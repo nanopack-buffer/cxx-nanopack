@@ -49,8 +49,6 @@ add_executable(nanoc
         src/data_type/np_message.hxx
         src/resolver/resolve_schemas.cxx
         src/resolver/resolve_schemas.hxx
-        src/parser/parse_result.cxx
-        src/parser/parse_result.hxx
         src/generator/cxx/cxx_message_generator.cxx
         src/generator/cxx/cxx_message_generator.hxx
         src/generator/swift/swift_message_generator.cxx
