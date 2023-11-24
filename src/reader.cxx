@@ -10,26 +10,17 @@ int8_t NanoPack::Reader::read_int8(int offset) const {
 	const uint8_t sign_bit = b & (1 << 7);
 	if (sign_bit == 0)
 		return static_cast<int8_t>(b);
-	return -((~b) + 1);
+	return -(~b + 1);
 }
 
 int32_t NanoPack::Reader::read_int32(int offset) const {
 	int32_t num = 0;
 	const uint8_t last_byte = *(buf_begin + offset + 3);
 
-	if constexpr (std::endian::native == std::endian::big) {
-		num |= *(buf_begin + offset) << 24;
-		num |= *(buf_begin + offset + 1) << 16;
-		num |= *(buf_begin + offset + 2) << 8;
-		num |= last_byte;
-	} else if constexpr (std::endian::native == std::endian::little) {
-		num |= *(buf_begin + offset);
-		num |= *(buf_begin + offset + 1) << 8;
-		num |= *(buf_begin + offset + 2) << 16;
-		num |= last_byte << 24;
-	} else {
-		throw "host has unsupported endianness.";
-	}
+	num |= *(buf_begin + offset);
+	num |= *(buf_begin + offset + 1) << 8;
+	num |= *(buf_begin + offset + 2) << 16;
+	num |= last_byte << 24;
 
 	const uint8_t sign_bit = last_byte & (1 << 7);
 	return sign_bit == 0 ? num : -((~num) + 1);
