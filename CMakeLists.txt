@@ -17,5 +17,6 @@ add_library(nanopack
 
 # include example targets
 add_subdirectory(examples/cxx/simple)
+add_subdirectory(examples/cxx/benchmark)
 
 target_include_directories(nanopack PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
