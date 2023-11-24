@@ -78,7 +78,7 @@ class Person {
     const lastNameByteLength = writer.appendString(this.lastName);
     writer.writeFieldSize(2, lastNameByteLength);
 
-    writer.appendInt8(this.age);
+    writer.appendInt32(this.age);
     writer.writeFieldSize(3, 4);
 
     if (this.otherFriend) {

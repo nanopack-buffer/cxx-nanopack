@@ -65,7 +65,7 @@ void TsInt32Generator::generate_write_code(CodeOutput &output,
 	const std::string field_name_camel_case = snake_to_camel(field.field_name);
 	// clang-format off
 	output.stream()
-	<< "writer.appendInt8(this." << field_name_camel_case << ");" << std::endl
+	<< "writer.appendInt32(this." << field_name_camel_case << ");" << std::endl
 	<< "writer.writeFieldSize(" << field.field_number << ", 4);" << std::endl;
 	// clang-format on
 }
