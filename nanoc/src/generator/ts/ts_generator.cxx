@@ -66,7 +66,7 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< "    constructor(";
 	// clang-format on
 
-	for (const MessageField &field : schema.fields) {
+	for (const MessageField &field : schema.declared_fields) {
 		const std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator == nullptr)
@@ -87,11 +87,11 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< "        return null;" << std::endl
 	<< "    }"
 	<< std::endl
-	<< "    let ptr = " << (schema.fields.size() + 1) * 4 << ";" << std::endl
+	<< "    let ptr = " << (schema.declared_fields.size() + 1) * 4 << ";" << std::endl
 	<< std::endl;
 	// clang-format on
 
-	for (const MessageField &field : schema.fields) {
+	for (const MessageField &field : schema.declared_fields) {
 		const std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator == nullptr)
@@ -106,7 +106,7 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< "return { bytesRead: ptr, result: new " << schema.message_name << "(";
 	// clang-format on
 
-	for (const MessageField &field : schema.fields) {
+	for (const MessageField &field : schema.declared_fields) {
 		code_output.stream() << snake_to_camel(field.field_name) << ", ";
 	}
 
@@ -116,12 +116,12 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< "}" << std::endl
 	<< std::endl
 	<< "public bytes(): Uint8Array {" << std::endl
-	<< "    const writer = new NanoBufWriter(" << (schema.fields.size() + 1) * 4 << ");" << std::endl
+	<< "    const writer = new NanoBufWriter(" << (schema.declared_fields.size() + 1) * 4 << ");" << std::endl
 	<< "    writer.writeTypeId(" << schema.message_name << ".TYPE_ID);" << std::endl
 	<< std::endl;
 	// clang-format on
 
-	for (const MessageField &field : schema.fields) {
+	for (const MessageField &field : schema.declared_fields) {
 		const std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator == nullptr)
@@ -146,6 +146,10 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 		"npx prettier " + output_path.string() + " --write";
 	system(format_cmd.c_str());
 }
+
+void TsGenerator::generate_message_factory(
+	const std::vector<MessageSchema> &all_schemas,
+	const std::filesystem::path &output_path) {}
 
 std::shared_ptr<DataTypeCodeGenerator>
 TsGenerator::find_generator_for_field(const MessageField &field) const {

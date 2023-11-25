@@ -38,6 +38,8 @@ struct MessageSchema {
 
 	std::vector<std::shared_ptr<MessageSchema>> imported_messages;
 
+	std::shared_ptr<MessageSchema> parent_message;
+
 	/**
 	 * The name of the top level message defined in the schema.
 	 */
@@ -48,10 +50,15 @@ struct MessageSchema {
 	 */
 	int type_id;
 
+	std::vector<MessageField> inherited_fields;
+
 	/**
-	 * Fields declared in the message.
+	 * Fields declared in the message schema.
+	 * This does not include inherited fields.
 	 */
-	std::vector<MessageField> fields;
+	std::vector<MessageField> declared_fields;
+
+	std::vector<MessageField> all_fields;
 };
 
 #endif // NANOPACK_NANOC_MESSAGE_SCHEMA_HXX

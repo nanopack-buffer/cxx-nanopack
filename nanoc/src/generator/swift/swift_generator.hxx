@@ -1,8 +1,8 @@
 #ifndef NANOPACK_NANOC_SWIFT_GENERATOR_HXX
 #define NANOPACK_NANOC_SWIFT_GENERATOR_HXX
 
-#include "../generator.hxx"
 #include "../data_type_code_generator.hxx"
+#include "../generator.hxx"
 
 class SwiftGenerator : public Generator {
   private:
@@ -16,6 +16,10 @@ class SwiftGenerator : public Generator {
 	SwiftGenerator();
 
 	void generate_for_schema(const MessageSchema &schema) override;
+
+	void
+	generate_message_factory(const std::vector<MessageSchema> &all_schemas,
+							 const std::filesystem::path &output_path) override;
 };
 
 #endif // NANOPACK_NANOC_SWIFT_GENERATOR_HXX

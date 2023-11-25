@@ -57,7 +57,7 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 
 	output_file_stream.open(output_path);
 
-	const size_t last_field_index = schema.fields.size() - 1;
+	const size_t last_field_index = schema.declared_fields.size() - 1;
 
 	// clang-format off
 	code_output.stream()
@@ -69,7 +69,7 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< "class " << schema.message_name << " {" << std::endl;
 	// clang-format on
 
-	for (const MessageField &field : schema.fields) {
+	for (const MessageField &field : schema.declared_fields) {
 		std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator != nullptr) {
@@ -85,7 +85,7 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 
 	code_output.stream() << "    init(";
 	size_t i = 0;
-	for (const MessageField &field : schema.fields) {
+	for (const MessageField &field : schema.declared_fields) {
 		std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator != nullptr) {
@@ -97,7 +97,7 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 		i++;
 	}
 	code_output.stream() << ") {" << std::endl;
-	for (const MessageField &field : schema.fields) {
+	for (const MessageField &field : schema.declared_fields) {
 		std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator != nullptr) {
@@ -115,11 +115,11 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< "            return nil" << std::endl
 	<< "        }" << std::endl
 	<< std::endl
-	<< "        var ptr = " << (schema.fields.size() + 1) * 4 << std::endl
+	<< "        var ptr = " << (schema.declared_fields.size() + 1) * 4 << std::endl
 	<< std::endl;
 	// clang-format on
 
-	for (const MessageField &field : schema.fields) {
+	for (const MessageField &field : schema.declared_fields) {
 		std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator != nullptr) {
@@ -134,17 +134,17 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< std::endl
 	<< "    func data() -> Data? {" << std::endl
 	<< "        var data = Data()" << std::endl
-	<< "        data.reserveCapacity(" << (schema.fields.size() + 1) * 4 << ")" << std::endl
+	<< "        data.reserveCapacity(" << (schema.declared_fields.size() + 1) * 4 << ")" << std::endl
 	<< std::endl
 	<< "        withUnsafeBytes(of: " << schema.message_name << ".typeID) {" << std::endl
 	<< "            data.append(contentsOf: $0)" << std::endl
 	<< "        }" << std::endl
 	<< std::endl
-	<< "        data.append([0], count: " << schema.fields.size() * 4 << ")" << std::endl
+	<< "        data.append([0], count: " << schema.declared_fields.size() * 4 << ")" << std::endl
 	<< std::endl;
 	// clang-format on
 
-	for (const MessageField &field : schema.fields) {
+	for (const MessageField &field : schema.declared_fields) {
 		std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator != nullptr) {
@@ -166,6 +166,13 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 		"swift-format --in-place " + output_path.string();
 	system(format_cmd.c_str());
 }
+
+void SwiftGenerator::generate_message_factory(
+	const std::vector<MessageSchema> &all_schemas,
+	const std::filesystem::path &output_path) {
+
+}
+
 
 std::shared_ptr<DataTypeCodeGenerator>
 SwiftGenerator::find_generator_for_field(const MessageField &field) {

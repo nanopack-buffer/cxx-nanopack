@@ -4,7 +4,6 @@
 #include "../../message_schema.hxx"
 #include "../data_type_code_generator.hxx"
 #include "../generator.hxx"
-#include <map>
 #include <string>
 
 class CxxGenerator : public Generator {
@@ -26,6 +25,10 @@ class CxxGenerator : public Generator {
 	CxxGenerator();
 
 	void generate_for_schema(const MessageSchema &schema) override;
+
+	void
+	generate_message_factory(const std::vector<MessageSchema> &all_schemas,
+							 const std::filesystem::path &output_path) override;
 };
 
 #endif // NANOPACK_NANOC_CXX_GENERATOR_HXX
