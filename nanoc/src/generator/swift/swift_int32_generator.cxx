@@ -49,15 +49,12 @@ void SwiftInt32Generator::generate_read_code(CodeOutput &output,
 											 const MessageField &field) {
 	const auto field_name_camel = snake_to_camel(field.field_name);
 	generate_read_code(output, field.type.get(), field_name_camel);
-	output.stream() << "self." << field_name_camel << " = " << field_name_camel
-					<< std::endl
-					<< std::endl;
 }
 
 void SwiftInt32Generator::generate_write_code(CodeOutput &output,
 											  NanoPack::DataType *type,
 											  const std::string &var_name) {
-	output.stream() << "data.append(int: " << var_name << ".littleEndian)"
+	output.stream() << "data.append(int: " << var_name << ")"
 					<< std::endl;
 }
 

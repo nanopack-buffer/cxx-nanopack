@@ -49,7 +49,7 @@ void SwiftBoolGenerator::generate_read_code(CodeOutput &output,
 	const auto field_name_camel = snake_to_camel(field.field_name);
 	// clang-format off
 	output.stream()
-	<< "self." << field_name_camel << " = data.read(at: ptr)" << std::endl
+	<< "let " << field_name_camel << " = data.read(at: ptr)" << std::endl
 	<< "ptr += 1" << std::endl
 	<< std::endl;
 	// clang-format on

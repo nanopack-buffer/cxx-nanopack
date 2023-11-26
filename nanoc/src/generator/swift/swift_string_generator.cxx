@@ -54,7 +54,6 @@ void SwiftStringGenerator::generate_read_code(CodeOutput &output,
 	<< "  return nil" << std::endl
 	<< "}" << std::endl
 	<< "ptr += " << field_name_camel << "Size" << std::endl
-	<< "self." << field_name_camel << " = " << field_name_camel << std::endl
 	<< std::endl;
 	// clang-format on
 }

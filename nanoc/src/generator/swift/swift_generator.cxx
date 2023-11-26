@@ -22,6 +22,11 @@
 
 const std::filesystem::path CODE_FILE_EXT(".np.swift");
 
+void format_code(const std::filesystem::path &path) {
+	const std::string format_cmd = "swift-format --in-place " + path.string();
+	system(format_cmd.c_str());
+}
+
 SwiftGenerator::SwiftGenerator()
 	: user_defined_message_type_generator(
 		  std::make_shared<SwiftMessageGenerator>()),
@@ -57,7 +62,7 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 
 	output_file_stream.open(output_path);
 
-	const size_t last_field_index = schema.declared_fields.size() - 1;
+	const bool has_parent_message = schema.parent_message != nullptr;
 
 	// clang-format off
 	code_output.stream()
@@ -66,7 +71,9 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< "import Foundation" << std::endl
 	<< "import NanoPack" << std::endl
 	<< std::endl
-	<< "class " << schema.message_name << " {" << std::endl;
+	<< "let " << schema.message_name << "_typeID: TypeID = " << schema.type_id << std::endl
+	<< std::endl
+	<< "class " << schema.message_name << " : " << (has_parent_message ? schema.parent_message->message_name : "NanoPackMessage") << " {" << std::endl;
 	// clang-format on
 
 	for (const MessageField &field : schema.declared_fields) {
@@ -77,26 +84,24 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 		}
 	}
 
-	// clang-format off
-	code_output.stream()
-	<< "    public static let typeID: Int32 = " << schema.type_id << std::endl
-	<< std::endl;
-	// clang-format on
+	{
+		code_output.stream() << std::endl << "    init(";
+		size_t i = 0;
+		const size_t last = schema.all_fields.size() - 1;
+		for (const MessageField &field : schema.all_fields) {
+			std::shared_ptr<DataTypeCodeGenerator> generator =
+				find_generator_for_field(field);
+			if (generator == nullptr)
+				continue;
 
-	code_output.stream() << "    init(";
-	size_t i = 0;
-	for (const MessageField &field : schema.declared_fields) {
-		std::shared_ptr<DataTypeCodeGenerator> generator =
-			find_generator_for_field(field);
-		if (generator != nullptr) {
 			generator->generate_constructor_parameter(code_output, field);
-			if (i < last_field_index) {
+			if (i++ < last) {
 				code_output.stream() << ", ";
 			}
 		}
-		i++;
+		code_output.stream() << ") {" << std::endl;
 	}
-	code_output.stream() << ") {" << std::endl;
+
 	for (const MessageField &field : schema.declared_fields) {
 		std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
@@ -106,20 +111,37 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 			code_output.stream() << std::endl;
 		}
 	}
+
+	if (has_parent_message) {
+		code_output.stream() << "super.init(";
+		size_t i = 0;
+		const size_t last = schema.inherited_fields.size() - 1;
+		for (const MessageField &inherited_field : schema.inherited_fields) {
+			const std::string field_name_camel_case =
+				snake_to_camel(inherited_field.field_name);
+			code_output.stream()
+				<< field_name_camel_case << ": " << field_name_camel_case;
+			if (i++ < last) {
+				code_output.stream() << ", ";
+			}
+		}
+		code_output.stream() << ")" << std::endl;
+	}
+
 	code_output.stream() << "}" << std::endl << std::endl;
 
 	// clang-format off
 	code_output.stream()
-	<< "    init?(data: Data) {" << std::endl
-	<< "        guard data.readTypeID() == " << schema.message_name << ".typeID else {" << std::endl
+	<< "    required init?(data: Data) {" << std::endl
+	<< "        guard data.readTypeID() == " << schema.message_name << "_typeID else {" << std::endl
 	<< "            return nil" << std::endl
 	<< "        }" << std::endl
 	<< std::endl
-	<< "        var ptr = " << (schema.declared_fields.size() + 1) * 4 << std::endl
+	<< "        var ptr = " << (schema.all_fields.size() + 1) * 4 << std::endl
 	<< std::endl;
 	// clang-format on
 
-	for (const MessageField &field : schema.declared_fields) {
+	for (const MessageField &field : schema.all_fields) {
 		std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator != nullptr) {
@@ -128,23 +150,46 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 		}
 	}
 
+	for (const MessageField &declared_field : schema.declared_fields) {
+		const std::string field_name_camel_case =
+			snake_to_camel(declared_field.field_name);
+		code_output.stream() << "self." << field_name_camel_case << " = "
+							 << field_name_camel_case << std::endl;
+	}
+
+	if (has_parent_message) {
+		code_output.stream() << "super.init(";
+		size_t i = 0;
+		const size_t last = schema.inherited_fields.size() - 1;
+		for (const MessageField &inherited_field : schema.inherited_fields) {
+			const std::string field_name_camel_case =
+				snake_to_camel(inherited_field.field_name);
+			code_output.stream()
+				<< field_name_camel_case << ": " << field_name_camel_case;
+			if (i++ < last) {
+				code_output.stream() << ", ";
+			}
+		}
+		code_output.stream() << ")" << std::endl;
+	}
+
 	// clang-format off
 	code_output.stream()
 	<< "    }" << std::endl // end init
 	<< std::endl
-	<< "    func data() -> Data? {" << std::endl
+	<< "    " << (has_parent_message ? "override " : "") << "func data() -> Data? {" << std::endl
 	<< "        var data = Data()" << std::endl
-	<< "        data.reserveCapacity(" << (schema.declared_fields.size() + 1) * 4 << ")" << std::endl
+	<< "        data.reserveCapacity(" << (schema.all_fields.size() + 1) * 4 << ")" << std::endl
 	<< std::endl
-	<< "        withUnsafeBytes(of: " << schema.message_name << ".typeID) {" << std::endl
+	<< "        withUnsafeBytes(of: Int32(" << schema.message_name << "_typeID)) {" << std::endl
 	<< "            data.append(contentsOf: $0)" << std::endl
 	<< "        }" << std::endl
 	<< std::endl
-	<< "        data.append([0], count: " << schema.declared_fields.size() * 4 << ")" << std::endl
+	<< "        data.append([0], count: " << schema.all_fields.size() * 4 << ")" << std::endl
 	<< std::endl;
 	// clang-format on
 
-	for (const MessageField &field : schema.declared_fields) {
+	for (const MessageField &field : schema.all_fields) {
 		std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator != nullptr) {
@@ -162,17 +207,43 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 
 	output_file_stream.close();
 
-	const std::string format_cmd =
-		"swift-format --in-place " + output_path.string();
-	system(format_cmd.c_str());
+	format_code(output_path);
 }
 
 void SwiftGenerator::generate_message_factory(
 	const std::vector<MessageSchema> &all_schemas,
 	const std::filesystem::path &output_path) {
+	std::ofstream file_stream;
+	std::filesystem::path output_file_path(output_path);
+	output_file_path.append("NanoPackMessageFactory.swift");
 
+	file_stream.open(output_file_path);
+
+	// clang-format off
+	file_stream
+	<< "import Foundation" << std::endl
+	<< "import NanoPack" << std::endl
+	<< std::endl
+	<< "func makeNanoPackMessage(from data: Data, typeID: TypeID) -> NanoPackMessage? {" << std::endl
+	<< "    switch typeID {" << std::endl;
+	// clang-format on
+
+	for (const MessageSchema &schema : all_schemas) {
+		file_stream << "case " << schema.type_id << ": return "
+					<< schema.message_name << "(data: data)" << std::endl;
+	}
+
+	// clang-format off
+	file_stream
+	<< "    default: return nil" << std::endl
+	<< "    }" << std::endl
+	<< "}" << std::endl;
+	// clang-format on
+
+	file_stream.close();
+
+	format_code(output_file_path);
 }
-
 
 std::shared_ptr<DataTypeCodeGenerator>
 SwiftGenerator::find_generator_for_field(const MessageField &field) {

@@ -99,10 +99,20 @@ void SwiftOptionalGenerator::generate_read_code(CodeOutput &output,
 		throw "something";
 	}
 
+	const std::string field_name_camel = snake_to_camel(field.field_name);
+
+	if (!output.is_variable_in_scope(field_name_camel)) {
+		// clang-format off
+		output.stream()
+		<< "let " << field_name_camel << ": " << get_type_declaration(field.type.get()) << std::endl;
+		// clang-format on
+		output.add_variable_to_scope(field_name_camel);
+	}
+
 	// clang-format off
 	output.stream()
 	<< "if data.readSize(ofField: " << field.field_number << ") < 0 {" << std::endl
-	<< "    self." << snake_to_camel(field.field_name) << " = nil" << std::endl
+	<< "    " << field_name_camel << " = nil" << std::endl
 	<< "} else {" << std::endl;
 	// clang-format on
 

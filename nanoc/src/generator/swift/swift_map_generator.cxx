@@ -141,8 +141,8 @@ void SwiftMapGenerator::generate_read_code(CodeOutput &output,
 	// read, at the current read ptr, the number of elements that should be in
 	// the map, and store the number to <var_name>_map_size
 	<< "let " << field_name_camel << "ItemCount = data.readUnalignedSize(at: ptr)" << std::endl
-	<< "self." << field_name_camel << " = [:]" << std::endl
-	<< "self." << field_name_camel << ".reserveCapacity(" << field_name_camel << "ItemCount)" << std::endl;
+	<< "let " << field_name_camel << " = [:]" << std::endl
+	<< field_name_camel << ".reserveCapacity(" << field_name_camel << "ItemCount)" << std::endl;
 	// clang-format on
 
 	// finds a name for the loop variable that doesn't clash with existing
@@ -167,7 +167,7 @@ void SwiftMapGenerator::generate_read_code(CodeOutput &output,
 
 	// clang-format off
 	output.stream()
-	<< "self." << field_name_camel << "[" << loop_var << "Key] = " << loop_var << "Value" << std::endl
+	<< field_name_camel << "[" << loop_var << "Key] = " << loop_var << "Value" << std::endl
 	<< "}" << std::endl // for
 	<< std::endl;
 	// clang-format on

@@ -136,7 +136,7 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 		// clang-format off
 		output.stream()
 		<< "let " << field_name_camel << "Size = data.readSize(ofField: " << field.field_number << ")" << std::endl
-		<< "self." << field_name_camel << " = data[ptr..<ptr + " << field_name_camel << "Size].withUnsafeBytes {" << std::endl
+		<< "let " << field_name_camel << " = data[ptr..<ptr + " << field_name_camel << "Size].withUnsafeBytes {" << std::endl
 		<< get_type_declaration(field.type.get()) << "($0.bindMemory(to: " << item_type_generator->get_type_declaration(item_type) << ".self)";
 		// clang-format on
 
@@ -156,9 +156,6 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 		// clang-format on
 	} else {
 		generate_read_code(output, field.type.get(), field_name_camel);
-		output.stream() << "self." << field_name_camel << " = "
-						<< field_name_camel << std::endl
-						<< std::endl;
 	}
 }
 

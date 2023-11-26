@@ -65,6 +65,12 @@ void SwiftMessageGenerator::generate_read_code(CodeOutput &output,
 	// clang-format on
 
 	if (is_self_referencing) {
+		if (!output.is_variable_in_scope(field_name_camel_case)) {
+			// clang-format off
+			output.stream()
+			<< "let " << field_name_camel_case << ": " << field.type->identifier() << "?" << std::endl;
+			// clang-format on
+		}
 		// clang-format off
 		output.stream()
 		<< "if " << field_name_camel_case << "Size < 0 {" << std::endl
@@ -76,7 +82,7 @@ void SwiftMessageGenerator::generate_read_code(CodeOutput &output,
 	} else {
 		// clang-format off
 		output.stream()
-		<< field_name_camel_case << " = " << field.type->identifier() << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size])" << std::endl;
+		<< (output.is_variable_in_scope(field_name_camel_case) ? "" : "let ") << field_name_camel_case << " = " << field.type->identifier() << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size])" << std::endl;
 		// clang-format on
 	}
 }

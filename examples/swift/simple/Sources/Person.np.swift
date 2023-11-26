@@ -3,7 +3,7 @@
 import Foundation
 import NanoPack
 
-class Person {
+class Person: NanoPackMessage {
   let firstName: String
   let middleName: String?
   let lastName: String
@@ -19,7 +19,7 @@ class Person {
     self.otherFriend = otherFriend
   }
 
-  init?(data: Data) {
+  required init?(data: Data) {
     guard data.readTypeID() == Person.typeID else {
       return nil
     }
