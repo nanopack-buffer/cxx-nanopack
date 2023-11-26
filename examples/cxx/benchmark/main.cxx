@@ -5,10 +5,13 @@
 #include <rapidjson/writer.h>
 
 int main() {
-	Person person("John", std::nullopt, "Doe", 40, nullptr);
+	auto friend_ =
+		std::make_shared<Person>("Steve", std::nullopt, "Jobs", 52, nullptr);
+	Person person("John", std::nullopt, "Doe", 40, std::move(friend_));
 	const char *person_json_str =
 		"{\"firstName\":\"John\",\"middleName\":null,\"lastName\":\"Doe\","
-		"\"age\":40,\"otherFriend\":null}";
+		"\"age\":40,\"otherFriend\":{\"firstName\":\"Steve\",\"middleName\":"
+		"null,\"lastName\":\"Jobs\",\"age\":52,\"otherFriend\":null}}";
 	const std::vector<uint8_t> nanobuf_data = person.data();
 
 	constexpr int SAMPLE_SIZE = 10000000;

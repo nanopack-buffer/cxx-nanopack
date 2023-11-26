@@ -3,16 +3,13 @@
 #ifndef PERSON_NP_HXX
 #define PERSON_NP_HXX
 
+#include <nanopack/message.hxx>
 #include <optional>
 #include <string>
 #include <vector>
 
-struct Person {
-private:
-  static const int FIELD_COUNT = 5;
-
-public:
-  static const int32_t TYPE_ID = 1;
+struct Person : NanoPack::Message {
+  static constexpr int32_t TYPE_ID = 1;
 
   std::string first_name;
   std::optional<std::string> middle_name;
@@ -20,7 +17,7 @@ public:
   int32_t age;
   std::shared_ptr<Person> other_friend;
 
-  Person();
+  Person() = default;
 
   Person(std::string first_name, std::optional<std::string> middle_name,
          std::string last_name, int32_t age,
@@ -28,7 +25,7 @@ public:
 
   Person(std::vector<uint8_t>::const_iterator begin, int &bytes_read);
 
-  std::vector<uint8_t> data();
+  [[nodiscard]] std::vector<uint8_t> data() const override;
 };
 
 #endif

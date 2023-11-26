@@ -2,8 +2,6 @@
 #include <nanopack/reader.hxx>
 #include <nanopack/writer.hxx>
 
-Person::Person() {}
-
 Person::Person(std::string first_name, std::optional<std::string> middle_name,
                std::string last_name, int32_t age,
                std::shared_ptr<Person> other_friend)
@@ -11,12 +9,12 @@ Person::Person(std::string first_name, std::optional<std::string> middle_name,
       last_name(std::move(last_name)), age(age),
       other_friend(std::move(other_friend)) {}
 
-Person::Person(std::vector<uint8_t>::const_iterator begin, int &bytes_read) {
-  NanoPack::Reader reader(begin);
+Person::Person(const std::vector<uint8_t>::const_iterator begin,
+               int &bytes_read) {
+  const NanoPack::Reader reader(begin);
   int ptr = 24;
 
-  const int32_t type_id = reader.read_type_id();
-  if (type_id != Person::TYPE_ID) {
+  if (reader.read_type_id() != TYPE_ID) {
     throw "incompatible type";
   }
 
@@ -52,11 +50,11 @@ Person::Person(std::vector<uint8_t>::const_iterator begin, int &bytes_read) {
   bytes_read = ptr;
 }
 
-std::vector<uint8_t> Person::data() {
+std::vector<uint8_t> Person::data() const {
   std::vector<uint8_t> buf(sizeof(int32_t) * 6);
   NanoPack::Writer writer(&buf);
 
-  writer.write_type_id(Person::TYPE_ID);
+  writer.write_type_id(TYPE_ID);
 
   writer.write_field_size(0, first_name.size());
   writer.append_string(first_name);
