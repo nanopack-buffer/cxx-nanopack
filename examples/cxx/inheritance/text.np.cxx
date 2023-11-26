@@ -26,10 +26,13 @@ Text::Text(const std::vector<uint8_t>::const_iterator begin, int &bytes_read)
 }
 
 std::vector<uint8_t> Text::data() const {
-  std::vector<uint8_t> buf(sizeof(int32_t) * 2);
+  std::vector<uint8_t> buf(sizeof(int32_t) * 3);
   NanoPack::Writer writer(&buf);
 
   writer.write_type_id(TYPE_ID);
+
+  writer.write_field_size(0, sizeof(int32_t));
+  writer.append_int32(id);
 
   writer.write_field_size(1, content.size());
   writer.append_string(content);

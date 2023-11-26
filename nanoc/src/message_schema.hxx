@@ -40,6 +40,8 @@ struct MessageSchema {
 
 	std::shared_ptr<MessageSchema> parent_message;
 
+	bool is_inherited;
+
 	/**
 	 * The name of the top level message defined in the schema.
 	 */

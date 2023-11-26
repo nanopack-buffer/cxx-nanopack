@@ -22,6 +22,7 @@ std::vector<MessageSchema> resolve_schemas(
 
 			const std::shared_ptr<MessageSchema> parent_message_schema =
 				entry->second.partial_schema;
+			parent_message_schema->is_inherited = true;
 			parse_result.partial_schema->parent_message = parent_message_schema;
 		}
 

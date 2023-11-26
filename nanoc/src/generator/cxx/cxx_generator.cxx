@@ -295,14 +295,14 @@ void CxxGenerator::generate_code_file(const MessageSchema &schema,
 	// clang-format off
 	output_file_stream
 	<< "std::vector<uint8_t> " << schema.message_name << "::data() const {" << std::endl
-	<< "std::vector<uint8_t> buf(sizeof(int32_t) * " << schema.declared_fields.size() + 1 << ");"
+	<< "std::vector<uint8_t> buf(sizeof(int32_t) * " << schema.all_fields.size() + 1 << ");"
 	<< "NanoPack::Writer writer(&buf);" << std::endl
 	<< std::endl
 	<< "writer.write_type_id(TYPE_ID);" << std::endl
 	<< std::endl;
 	// clang-format on
 
-	for (const MessageField &field : schema.declared_fields) {
+	for (const MessageField &field : schema.all_fields) {
 		std::shared_ptr<DataTypeCodeGenerator> generator =
 			find_generator_for_field(field);
 		if (generator == nullptr) {
