@@ -14,8 +14,14 @@ SwiftMessageGenerator::get_read_size_expression(NanoPack::DataType *data_type,
 
 void SwiftMessageGenerator::generate_constructor_parameter(
 	CodeOutput &output, const MessageField &field) {
+	const std::string message_type_name = field.type->identifier();
 	output.stream() << snake_to_camel(field.field_name) << ": "
-					<< field.type->identifier();
+					<< message_type_name;
+	if (const bool is_self_referencing =
+			output.get_message_schema().message_name == message_type_name;
+		is_self_referencing) {
+		output.stream() << "?";
+	}
 }
 
 void SwiftMessageGenerator::generate_constructor_field_initializer(

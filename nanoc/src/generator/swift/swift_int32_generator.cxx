@@ -34,12 +34,12 @@ void SwiftInt32Generator::generate_read_code(CodeOutput &output,
 											 NanoPack::DataType *type,
 											 const std::string &var_name) {
 	if (output.is_variable_in_scope(var_name)) {
-		output.stream() << var_name << " = data.readUnaligned(at: ptr)"
+		output.stream() << var_name << " = data.read(at: ptr)"
 						<< std::endl;
 	} else {
 		// clang-format off
 		output.stream()
-		<< "let " << var_name << ": " << get_type_declaration(type) << " = data.readUnaligned(at: ptr)" << std::endl;
+		<< "let " << var_name << ": " << get_type_declaration(type) << " = data.read(at: ptr)" << std::endl;
 		// clang-format on
 	}
 	output.stream() << "ptr += 4" << std::endl;

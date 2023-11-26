@@ -68,7 +68,7 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 
 	// clang-format off
 	output.stream()
-	<< "let " << var_name << "ItemCount = data.readUnalignedSize(at: ptr)" << std::endl
+	<< "let " << var_name << "ItemCount = data.readSize(at: ptr)" << std::endl
 	<< "ptr += 4" << std::endl;
 	// clang-format on
 

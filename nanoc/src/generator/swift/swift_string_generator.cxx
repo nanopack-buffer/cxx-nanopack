@@ -35,7 +35,7 @@ void SwiftStringGenerator::generate_read_code(CodeOutput &output,
 											  const std::string &var_name) {
 	// clang-format off
 	output.stream()
-	<< "let " << var_name << "Size = data.readUnalignedSize(at: ptr)" << std::endl
+	<< "let " << var_name << "Size = data.readSize(at: ptr)" << std::endl
 	<< "ptr += 4" << std::endl
 	<< "guard let " << var_name << " = data.read(at: ptr, withLength: " << var_name << "Size) else {" << std::endl
 	<< "  return nil" << std::endl
@@ -50,12 +50,15 @@ void SwiftStringGenerator::generate_read_code(CodeOutput &output,
 	// clang-format off
 	output.stream()
 	<< "let " << field_name_camel << "Size = data.readSize(ofField: " << field.field_number << ")" << std::endl
-	<< "guard let " << field_name_camel << " = data.read(at: ptr, withLength: " << field_name_camel << "Size) else {" << std::endl
+	<< "guard let " << (output.is_variable_in_scope(field_name_camel) ? field_name_camel + "_" : field_name_camel) << " = data.read(at: ptr, withLength: " << field_name_camel << "Size) else {" << std::endl
 	<< "  return nil" << std::endl
 	<< "}" << std::endl
-	<< "ptr += " << field_name_camel << "Size" << std::endl
-	<< std::endl;
+	<< "ptr += " << field_name_camel << "Size" << std::endl;
 	// clang-format on
+	if (output.is_variable_in_scope(field_name_camel)) {
+		output.stream() << field_name_camel << " = " << field_name_camel << "_"
+						<< std::endl;
+	}
 }
 
 void SwiftStringGenerator::generate_write_code(CodeOutput &output,
