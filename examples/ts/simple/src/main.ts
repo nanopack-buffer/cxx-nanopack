@@ -1,4 +1,4 @@
-import {Person} from "./person.np.ts"
+import {Person} from "./person.np.js"
 
 console.log("a simple program demonstrating conversion between NanoPack data & TypeScript class.")
 

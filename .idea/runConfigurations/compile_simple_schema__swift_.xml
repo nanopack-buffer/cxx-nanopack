@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="compile simple schema (swift)" type="CMakeRunConfiguration" factoryName="Application" folderName="simple example" PROGRAM_PARAMS="--language swift examples/swift/simple/Sources/person.yaml" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="nanopack" TARGET_NAME="nanoc" CONFIG_NAME="conan-debug" RUN_TARGET_PROJECT_NAME="nanopack" RUN_TARGET_NAME="nanoc">
+  <configuration default="false" name="compile simple schema (swift)" type="CMakeRunConfiguration" factoryName="Application" folderName="simple example" PROGRAM_PARAMS="--language swift examples/swift/simple/Sources/person.yaml" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="nanopack" TARGET_NAME="nanoc" CONFIG_NAME="conan-release" RUN_TARGET_PROJECT_NAME="nanopack" RUN_TARGET_NAME="nanoc">
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>

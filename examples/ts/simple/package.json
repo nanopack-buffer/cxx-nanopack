@@ -2,16 +2,15 @@
   "name": "nanopack-simple-demo",
   "module": "index.ts",
   "type": "module",
-  "devDependencies": {
-    "bun-types": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
+  "scripts": {
+    "start": "ts-node --esm src/main.ts"
   },
   "dependencies": {
     "nanopack": "git+https://github.com/poly-gui/ts-nanopack.git#main"
   },
-  "trustedDependencies": [
-    "nanopack"
-  ]
+  "devDependencies": {
+    "bun-types": "latest",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  }
 }

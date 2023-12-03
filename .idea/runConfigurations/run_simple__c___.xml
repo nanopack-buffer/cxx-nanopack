@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="run simple (c++)" type="CMakeRunConfiguration" factoryName="Application" folderName="simple example" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="nanopack" TARGET_NAME="simple_example" CONFIG_NAME="conan-debug" RUN_TARGET_PROJECT_NAME="nanopack" RUN_TARGET_NAME="simple_example">
+  <configuration default="false" name="run simple (c++)" type="CMakeRunConfiguration" factoryName="Application" folderName="simple example" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="nanopack" TARGET_NAME="simple_example" CONFIG_NAME="conan-release" RUN_TARGET_PROJECT_NAME="nanopack" RUN_TARGET_NAME="simple_example">
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>
