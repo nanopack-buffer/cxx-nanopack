@@ -1,6 +1,7 @@
 #include "swift_array_generator.hxx"
 #include "../../data_type/np_array.hxx"
 #include "../../data_type/np_int32.hxx"
+#include "../../data_type/np_int64.hxx"
 #include "../../data_type/np_int8.hxx"
 #include "../../string_util/case_conv.hxx"
 
@@ -81,6 +82,7 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 		// clang-format on
 
 		const auto is_fixed_width_integer =
+			item_type->identifier() == NanoPack::Int64::IDENTIFIER ||
 			item_type->identifier() == NanoPack::Int32::IDENTIFIER ||
 			item_type->identifier() == NanoPack::Int8::IDENTIFIER;
 		if (is_fixed_width_integer) {
@@ -141,6 +143,7 @@ void SwiftArrayGenerator::generate_read_code(CodeOutput &output,
 		// clang-format on
 
 		const auto is_fixed_width_integer =
+			item_type->identifier() == NanoPack::Int64::IDENTIFIER ||
 			item_type->identifier() == NanoPack::Int32::IDENTIFIER ||
 			item_type->identifier() == NanoPack::Int8::IDENTIFIER;
 		if (is_fixed_width_integer) {

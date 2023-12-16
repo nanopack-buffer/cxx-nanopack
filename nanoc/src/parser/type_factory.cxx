@@ -1,6 +1,7 @@
 #include "type_factory.hxx"
 #include "../data_type/np_array.hxx"
 #include "../data_type/np_int32.hxx"
+#include "../data_type/np_int64.hxx"
 #include "../data_type/np_int8.hxx"
 #include "../data_type/np_map.hxx"
 #include "../data_type/np_message.hxx"
@@ -28,6 +29,9 @@ NanoPack::create_type_from_literal(const std::string &literal) {
 	}
 	if (literal == NanoPack::Int32::IDENTIFIER) {
 		return std::make_unique<NanoPack::Int32>();
+	}
+	if (literal == NanoPack::Int64::IDENTIFIER) {
+		return std::make_unique<NanoPack::Int64>();
 	}
 	if (literal == NanoPack::Double::IDENTIFIER) {
 		return std::make_unique<NanoPack::Double>();

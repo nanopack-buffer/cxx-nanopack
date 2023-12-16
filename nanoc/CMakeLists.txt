@@ -71,6 +71,14 @@ add_executable(nanoc
         src/generator/ts/ts_optional_generator.hxx
         src/generator/ts/ts_message_generator.cxx
         src/generator/ts/ts_message_generator.hxx
+        src/data_type/np_int64.cxx
+        src/data_type/np_int64.hxx
+        src/generator/ts/ts_int64_generator.cxx
+        src/generator/ts/ts_int64_generator.hxx
+        src/generator/swift/swift_int64_generator.cxx
+        src/generator/swift/swift_int64_generator.hxx
+        src/generator/cxx/cxx_int64_generator.cxx
+        src/generator/cxx/cxx_int64_generator.hxx
 )
 
 target_link_libraries(nanoc argparse::argparse yaml onetbb::onetbb)

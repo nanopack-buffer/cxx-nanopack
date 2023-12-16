@@ -3,6 +3,7 @@
 #include "../../data_type/np_bool.hxx"
 #include "../../data_type/np_double.hxx"
 #include "../../data_type/np_int32.hxx"
+#include "../../data_type/np_int64.hxx"
 #include "../../data_type/np_int8.hxx"
 #include "../../data_type/np_map.hxx"
 #include "../../data_type/np_optional.hxx"
@@ -12,11 +13,13 @@
 #include "swift_bool_generator.hxx"
 #include "swift_double_generator.hxx"
 #include "swift_int32_generator.hxx"
+#include "swift_int64_generator.hxx"
 #include "swift_int8_generator.hxx"
 #include "swift_map_generator.hxx"
 #include "swift_message_generator.hxx"
 #include "swift_optional_generator.hxx"
 #include "swift_string_generator.hxx"
+
 #include <filesystem>
 #include <fstream>
 
@@ -38,6 +41,8 @@ SwiftGenerator::SwiftGenerator()
 		NanoPack::Int8::IDENTIFIER, std::make_shared<SwiftInt8Generator>());
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::Int32::IDENTIFIER, std::make_shared<SwiftInt32Generator>());
+	data_type_generator_registry->add_generator_for_type(
+		NanoPack::Int64::IDENTIFIER, std::make_shared<SwiftInt64Generator>());
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::Double::IDENTIFIER, std::make_shared<SwiftDoubleGenerator>());
 	data_type_generator_registry->add_generator_for_type(

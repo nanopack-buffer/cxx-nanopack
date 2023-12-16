@@ -3,6 +3,7 @@
 #include "../../data_type/np_array.hxx"
 #include "../../data_type/np_bool.hxx"
 #include "../../data_type/np_int32.hxx"
+#include "../../data_type/np_int64.hxx"
 #include "../../data_type/np_int8.hxx"
 #include "../../data_type/np_map.hxx"
 #include "../../data_type/np_optional.hxx"
@@ -11,6 +12,7 @@
 #include "ts_array_generator.hxx"
 #include "ts_bool_generator.hxx"
 #include "ts_int32_generator.hxx"
+#include "ts_int64_generator.hxx"
 #include "ts_int8_generator.hxx"
 #include "ts_map_generator.hxx"
 #include "ts_message_generator.hxx"
@@ -32,6 +34,8 @@ TsGenerator::TsGenerator()
 		NanoPack::Int8::IDENTIFIER, std::make_shared<TsInt8Generator>());
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::Int32::IDENTIFIER, std::make_shared<TsInt32Generator>());
+	data_type_generator_registry->add_generator_for_type(
+		NanoPack::Int64::IDENTIFIER, std::make_shared<TsInt64Generator>());
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::String::IDENTIFIER, std::make_shared<TsStringGenerator>());
 	data_type_generator_registry->add_generator_for_type(

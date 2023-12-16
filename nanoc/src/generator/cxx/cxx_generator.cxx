@@ -3,6 +3,7 @@
 #include "../../data_type/np_bool.hxx"
 #include "../../data_type/np_double.hxx"
 #include "../../data_type/np_int32.hxx"
+#include "../../data_type/np_int64.hxx"
 #include "../../data_type/np_int8.hxx"
 #include "../../data_type/np_map.hxx"
 #include "../../data_type/np_optional.hxx"
@@ -12,11 +13,13 @@
 #include "cxx_bool_generator.hxx"
 #include "cxx_double_generator.hxx"
 #include "cxx_int32_generator.hxx"
+#include "cxx_int64_generator.hxx"
 #include "cxx_int8_generator.hxx"
 #include "cxx_map_generator.hxx"
 #include "cxx_message_generator.hxx"
 #include "cxx_optional_generator.hxx"
 #include "cxx_string_generator.hxx"
+
 #include <filesystem>
 #include <fstream>
 #include <set>
@@ -35,6 +38,8 @@ CxxGenerator::CxxGenerator()
 		NanoPack::Int8::IDENTIFIER, std::make_shared<CxxInt8Generator>());
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::Int32::IDENTIFIER, std::make_shared<CxxInt32Generator>());
+	data_type_generator_registry->add_generator_for_type(
+		NanoPack::Int64::IDENTIFIER, std::make_shared<CxxInt64Generator>());
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::Double::IDENTIFIER, std::make_shared<CxxDoubleGenerator>());
 	data_type_generator_registry->add_generator_for_type(

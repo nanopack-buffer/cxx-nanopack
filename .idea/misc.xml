@@ -5,6 +5,11 @@
     <excludeRoots>
       <file path="$PROJECT_DIR$/.cache" />
       <file path="$PROJECT_DIR$/cmake-build-debug" />
+      <file path="$PROJECT_DIR$/examples/swift/benchmark/.swiftpm" />
+      <file path="$PROJECT_DIR$/examples/swift/inheritance/.swiftpm" />
+      <file path="$PROJECT_DIR$/examples/swift/simple/.build" />
+      <file path="$PROJECT_DIR$/examples/swift/simple/.swiftpm" />
+      <file path="$PROJECT_DIR$/examples/ts/benchmark/build" />
     </excludeRoots>
   </component>
 </project>

@@ -154,7 +154,7 @@ std::optional<ParseResult> parse_schema_file(const std::filesystem::path &file_p
 
 			if (key_name == SchemaSymbol::KEYWORD_TYPE_ID) {
 				// type_id declaration encountered, treat current token as
-				// value of type id
+				// value of type idnt3
 				const int type_id =
 					atoi(reinterpret_cast<char *>(token.data.scalar.value));
 				if (type_id <= 0) {
