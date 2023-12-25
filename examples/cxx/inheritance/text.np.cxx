@@ -5,9 +5,7 @@
 Text::Text(int32_t id, std::string content)
     : Widget(id), content(std::move(content)) {}
 
-Text::Text(const std::vector<uint8_t>::const_iterator begin, int &bytes_read)
-    : Widget() {
-  const NanoPack::Reader reader(begin);
+Text::Text(const NanoPack::Reader &reader, int &bytes_read) : Widget() {
   int ptr = 12;
 
   if (reader.read_type_id() != TYPE_ID) {
@@ -24,6 +22,9 @@ Text::Text(const std::vector<uint8_t>::const_iterator begin, int &bytes_read)
 
   bytes_read = ptr;
 }
+
+Text::Text(std::vector<uint8_t>::const_iterator begin, int &bytes_read)
+    : Text(NanoPack::Reader(begin), bytes_read) {}
 
 std::vector<uint8_t> Text::data() const {
   std::vector<uint8_t> buf(sizeof(int32_t) * 3);

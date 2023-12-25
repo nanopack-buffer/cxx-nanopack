@@ -23,7 +23,7 @@ class Message : public DataType {
 	std::string message_name;
 
   public:
-	Message(std::string message_name);
+	explicit Message(std::string message_name);
 
 	std::string identifier() override;
 

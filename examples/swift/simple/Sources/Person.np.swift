@@ -3,15 +3,16 @@
 import Foundation
 import NanoPack
 
+let Person_typeID: TypeID = 1
+
 class Person: NanoPackMessage {
   let firstName: String
   let middleName: String?
   let lastName: String
   let age: Int32
   let otherFriend: Person?
-  public static let typeID: Int32 = 1
 
-  init(firstName: String, middleName: String?, lastName: String, age: Int32, otherFriend: Person) {
+  init(firstName: String, middleName: String?, lastName: String, age: Int32, otherFriend: Person?) {
     self.firstName = firstName
     self.middleName = middleName
     self.lastName = lastName
@@ -20,7 +21,7 @@ class Person: NanoPackMessage {
   }
 
   required init?(data: Data) {
-    guard data.readTypeID() == Person.typeID else {
+    guard data.readTypeID() == Person_typeID else {
       return nil
     }
 
@@ -31,18 +32,17 @@ class Person: NanoPackMessage {
       return nil
     }
     ptr += firstNameSize
-    self.firstName = firstName
 
+    let middleName: String?
     if data.readSize(ofField: 1) < 0 {
-      self.middleName = nil
+      middleName = nil
     } else {
       let middleNameSize = data.readSize(ofField: 1)
-      guard let middleName = data.read(at: ptr, withLength: middleNameSize) else {
+      guard let middleName_ = data.read(at: ptr, withLength: middleNameSize) else {
         return nil
       }
       ptr += middleNameSize
-      self.middleName = middleName
-
+      middleName = middleName_
     }
 
     let lastNameSize = data.readSize(ofField: 2)
@@ -50,26 +50,30 @@ class Person: NanoPackMessage {
       return nil
     }
     ptr += lastNameSize
-    self.lastName = lastName
 
-    let age: Int32 = data.readUnaligned(at: ptr)
+    let age: Int32 = data.read(at: ptr)
     ptr += 4
-    self.age = age
 
     let otherFriendSize = data.readSize(ofField: 4)
+    let otherFriend: Person?
     if otherFriendSize < 0 {
       otherFriend = nil
     } else {
-      otherFriend = Person(data: data.subdata(in: ptr..<ptr + otherFriendSize))
+      otherFriend = Person(data: data[ptr..<ptr + otherFriendSize])
     }
 
+    self.firstName = firstName
+    self.middleName = middleName
+    self.lastName = lastName
+    self.age = age
+    self.otherFriend = otherFriend
   }
 
   func data() -> Data? {
     var data = Data()
     data.reserveCapacity(24)
 
-    withUnsafeBytes(of: Person.typeID) {
+    withUnsafeBytes(of: Int32(Person_typeID)) {
       data.append(contentsOf: $0)
     }
 
@@ -90,7 +94,7 @@ class Person: NanoPackMessage {
     data.append(string: lastName)
 
     data.write(size: 4, ofField: 3)
-    data.append(int: age.littleEndian)
+    data.append(int: age)
 
     if let otherFriend = self.otherFriend, let otherFriendData = otherFriend.data() {
       data.append(otherFriendData)

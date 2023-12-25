@@ -94,6 +94,8 @@ class DataTypeCodeGeneratorRegistry {
   private:
 	std::map<std::string, std::shared_ptr<DataTypeCodeGenerator>> generators;
 
+	std::shared_ptr<DataTypeCodeGenerator> message_generator;
+
   public:
 	DataTypeCodeGeneratorRegistry();
 
@@ -108,6 +110,9 @@ class DataTypeCodeGeneratorRegistry {
 	void
 	add_generator_for_type(NanoPack::DataType *data_type,
 						   std::shared_ptr<DataTypeCodeGenerator> generator);
+
+	void
+	set_message_generator(std::shared_ptr<DataTypeCodeGenerator> generator);
 
 	/**
 	 * Registers the given generator with the given data type.
@@ -140,7 +145,7 @@ class DataTypeCodeGeneratorRegistry {
 	 * can generate code for the data type, or nullptr if none is found.
 	 */
 	std::shared_ptr<DataTypeCodeGenerator>
-	find_generator_for_type(std::string type_identifier);
+	find_generator_for_type(const std::string &type_identifier);
 };
 
 #endif // NANOPACK_NANOC_DATA_TYPE_CODE_GENERATOR_HXX

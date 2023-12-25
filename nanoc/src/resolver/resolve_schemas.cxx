@@ -22,23 +22,27 @@ std::vector<MessageSchema> resolve_schemas(
 
 			const std::shared_ptr<MessageSchema> parent_message_schema =
 				entry->second.partial_schema;
+			parent_message_schema->child_messages.emplace_back(
+				parse_result.partial_schema);
 			parent_message_schema->is_inherited = true;
 			parse_result.partial_schema->parent_message = parent_message_schema;
 		}
 
-		{ // find all imported types
-			for (const std::shared_ptr<NanoPack::DataType> &unresolved_type :
-				 parse_result.unresolved_types) {
-				const auto entry =
-					parse_results.find(unresolved_type->identifier());
-				if (entry == parse_results.end()) {
-					return {};
-				}
-				parse_result.partial_schema->imported_messages.emplace_back(
-					entry->second.partial_schema);
+		// find all imported types
+		for (const std::shared_ptr<NanoPack::DataType> &unresolved_type :
+			 parse_result.unresolved_types) {
+			const auto entry =
+				parse_results.find(unresolved_type->identifier());
+			if (entry == parse_results.end()) {
+				return {};
 			}
-			resolved_schemas.emplace_back(*parse_result.partial_schema);
+			parse_result.partial_schema->imported_messages.emplace_back(
+				entry->second.partial_schema);
 		}
+	}
+
+	for (auto &[message_name, parse_result] : parse_results) {
+		resolved_schemas.emplace_back(*parse_result.partial_schema);
 	}
 
 	// adjust field numbers according to message inheritance

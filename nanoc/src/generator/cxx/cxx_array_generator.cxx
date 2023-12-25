@@ -13,9 +13,10 @@ CxxArrayGenerator::get_type_declaration(NanoPack::DataType *data_type) {
 		throw "Cannot deduce type declaration - not enough type information.";
 	}
 
-	auto array_type = dynamic_cast<NanoPack::Array *>(data_type);
-	std::shared_ptr<NanoPack::DataType> item_type = array_type->get_item_type();
-	auto item_type_generator =
+	const auto array_type = dynamic_cast<NanoPack::Array *>(data_type);
+	const std::shared_ptr<NanoPack::DataType> item_type =
+		array_type->get_item_type();
+	const auto item_type_generator =
 		generator_registry->find_generator_for_type(item_type.get());
 	if (item_type_generator == nullptr) {
 		throw "Array has unsupported type: " + item_type->identifier();

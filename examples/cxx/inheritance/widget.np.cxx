@@ -2,11 +2,25 @@
 #include <nanopack/reader.hxx>
 #include <nanopack/writer.hxx>
 
+#include "text.np.hxx"
+
+std::unique_ptr<Widget> Widget::from(std::vector<uint8_t>::const_iterator begin,
+                                     int &bytes_read) {
+  const NanoPack::Reader reader(begin);
+  const auto type_id = reader.read_type_id();
+  switch (type_id) {
+  case TYPE_ID:
+    return std::make_unique<Widget>(reader, bytes_read);
+  case Text::TYPE_ID:
+    return std::make_unique<Text>(reader, bytes_read);
+  default:
+    return nullptr;
+  }
+}
+
 Widget::Widget(int32_t id) : id(id) {}
 
-Widget::Widget(const std::vector<uint8_t>::const_iterator begin,
-               int &bytes_read) {
-  const NanoPack::Reader reader(begin);
+Widget::Widget(const NanoPack::Reader &reader, int &bytes_read) {
   int ptr = 8;
 
   if (reader.read_type_id() != TYPE_ID) {
@@ -19,6 +33,9 @@ Widget::Widget(const std::vector<uint8_t>::const_iterator begin,
 
   bytes_read = ptr;
 }
+
+Widget::Widget(std::vector<uint8_t>::const_iterator begin, int &bytes_read)
+    : Widget(NanoPack::Reader(begin), bytes_read) {}
 
 std::vector<uint8_t> Widget::data() const {
   std::vector<uint8_t> buf(sizeof(int32_t) * 2);

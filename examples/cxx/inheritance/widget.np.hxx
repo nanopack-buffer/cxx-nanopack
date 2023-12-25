@@ -4,6 +4,7 @@
 #define WIDGET_NP_HXX
 
 #include <nanopack/message.hxx>
+#include <nanopack/reader.hxx>
 #include <vector>
 
 struct Widget : NanoPack::Message {
@@ -11,11 +12,16 @@ struct Widget : NanoPack::Message {
 
   int32_t id;
 
+  static std::unique_ptr<Widget>
+  from(std::vector<uint8_t>::const_iterator begin, int &bytes_read);
+
   Widget() = default;
 
   explicit Widget(int32_t id);
 
   Widget(std::vector<uint8_t>::const_iterator begin, int &bytes_read);
+
+  Widget(const NanoPack::Reader &reader, int &bytes_read);
 
   [[nodiscard]] std::vector<uint8_t> data() const override;
 };

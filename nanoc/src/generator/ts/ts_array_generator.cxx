@@ -11,15 +11,14 @@ TsArrayGenerator::TsArrayGenerator(
 std::string
 TsArrayGenerator::get_type_declaration(NanoPack::DataType *data_type) {
 	const auto array_type = dynamic_cast<NanoPack::Array *>(data_type);
+	const auto item_type = array_type->get_item_type().get();
 	const auto item_type_generator =
-		generator_registry->find_generator_for_type(array_type);
+		generator_registry->find_generator_for_type(item_type);
 	if (item_type_generator == nullptr) {
 		// TODO: better error handling
 		throw "something";
 	}
-	return item_type_generator->get_type_declaration(
-			   array_type->get_item_type().get()) +
-		   "[]";
+	return item_type_generator->get_type_declaration(item_type) + "[]";
 }
 
 std::string
@@ -237,7 +236,7 @@ void TsArrayGenerator::generate_write_code(CodeOutput &output,
 		// declare an accumulator variable to store the total size of the array
 		<< "let " << field_name_camel_case << "ByteLength = 4;" << std::endl
 		// append number of elements in the array before the actual array data
-		<< "writer.appendInt32(" << field.field_name << ".size());" << std::endl;
+		<< "writer.appendInt32(this." << field_name_camel_case << ".length);" << std::endl;
 		// clang-format on
 	}
 
@@ -249,7 +248,7 @@ void TsArrayGenerator::generate_write_code(CodeOutput &output,
 
 	// clang-format off
 	output.stream()
-	<< "for (const" << loop_var << " of " << field.field_name << ") {" << std::endl;
+	<< "for (const " << loop_var << " of this." << field_name_camel_case << ") {" << std::endl;
 	// clang-format on
 
 	output.add_variable_to_scope(loop_var);
@@ -259,7 +258,7 @@ void TsArrayGenerator::generate_write_code(CodeOutput &output,
 	if (!item_type->is_fixed_size()) {
 		// store the byte size of the raw data of the item into the variable
 		// declared earlier
-		output.stream() << field.field_name << "ByteLength += "
+		output.stream() << field_name_camel_case << "ByteLength += "
 						<< item_type_generator->get_read_size_expression(
 							   item_type.get(), loop_var)
 						<< ";" << std::endl;
@@ -272,7 +271,7 @@ void TsArrayGenerator::generate_write_code(CodeOutput &output,
 		// write the accumulator variable declared earlier into the size header
 		// for the field
 		output.stream() << "writer.writeFieldSize(" << field.field_number
-						<< ", " << field.field_name << "ByteLength);"
+						<< ", " << field_name_camel_case << "ByteLength);"
 						<< std::endl
 						<< std::endl;
 	}

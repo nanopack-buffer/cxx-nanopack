@@ -12,6 +12,14 @@ class Widget: NanoPackMessage {
     self.id = id
   }
 
+  static func from(data: Data) -> Widget? {
+    switch data.readTypeID() {
+    case Widget_typeID: return Widget(data: data)
+    case Text_typeID: return Text(data: data)
+    default: return nil
+    }
+  }
+
   required init?(data: Data) {
     guard data.readTypeID() == Widget_typeID else {
       return nil
@@ -19,7 +27,7 @@ class Widget: NanoPackMessage {
 
     var ptr = 8
 
-    let id: Int32 = data.readUnaligned(at: ptr)
+    let id: Int32 = data.read(at: ptr)
     ptr += 4
 
     self.id = id

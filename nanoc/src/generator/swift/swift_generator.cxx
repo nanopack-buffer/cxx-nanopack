@@ -56,6 +56,8 @@ SwiftGenerator::SwiftGenerator()
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::Optional::IDENTIFIER,
 		std::make_shared<SwiftOptionalGenerator>(data_type_generator_registry));
+	data_type_generator_registry->set_message_generator(
+		user_defined_message_type_generator);
 }
 
 void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
@@ -134,6 +136,31 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 	}
 
 	code_output.stream() << "}" << std::endl << std::endl;
+
+	if (schema.is_inherited) {
+		// clang-format off
+		code_output.stream()
+		<< "static func from(data: Data) -> " << schema.message_name << "? {" << std::endl
+		<< "    switch data.readTypeID() {" << std::endl
+		<< "    case " << schema.message_name << "_typeID: return " << schema.message_name << "(data: data)" << std::endl;
+		// clang-format on
+
+		for (const std::shared_ptr<MessageSchema> &child_message :
+			 schema.child_messages) {
+			// clang-format off
+			code_output.stream()
+			<< "case " << child_message->message_name << "_typeID: return " << child_message->message_name << "(data: data)" << std::endl;
+			// clang-format on
+		}
+
+		// clang-format off
+		code_output.stream()
+		<< "    default: return nil" << std::endl
+		<< "    }" << std::endl
+		<< "}" << std::endl
+		<< std::endl;
+		// clang-format on
+	}
 
 	// clang-format off
 	code_output.stream()

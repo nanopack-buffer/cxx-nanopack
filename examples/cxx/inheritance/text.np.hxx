@@ -4,6 +4,7 @@
 #define TEXT_NP_HXX
 
 #include "widget.np.hxx"
+#include <nanopack/reader.hxx>
 #include <string>
 #include <vector>
 
@@ -17,6 +18,8 @@ struct Text : Widget {
   Text(int32_t id, std::string content);
 
   Text(std::vector<uint8_t>::const_iterator begin, int &bytes_read);
+
+  Text(const NanoPack::Reader &reader, int &bytes_read);
 
   [[nodiscard]] std::vector<uint8_t> data() const override;
 };

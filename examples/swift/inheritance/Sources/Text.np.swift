@@ -20,7 +20,7 @@ class Text: Widget {
 
     var ptr = 12
 
-    let id: Int32 = data.readUnaligned(at: ptr)
+    let id: Int32 = data.read(at: ptr)
     ptr += 4
 
     let contentSize = data.readSize(ofField: 1)

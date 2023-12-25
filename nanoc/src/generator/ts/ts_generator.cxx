@@ -1,11 +1,13 @@
 #include "ts_generator.hxx"
 
+#include "../../../../../../../.conan2/p/rapid4cabb31a09329/p/include/rapidjson/error/error.h"
 #include "../../data_type/np_array.hxx"
 #include "../../data_type/np_bool.hxx"
 #include "../../data_type/np_int32.hxx"
 #include "../../data_type/np_int64.hxx"
 #include "../../data_type/np_int8.hxx"
 #include "../../data_type/np_map.hxx"
+#include "../../data_type/np_message.hxx"
 #include "../../data_type/np_optional.hxx"
 #include "../../data_type/np_string.hxx"
 #include "../../string_util/case_conv.hxx"
@@ -22,6 +24,22 @@
 #include <fstream>
 
 const std::filesystem::path CODE_FILE_EXT(".np.ts");
+
+std::string resolve_ts_import_path(const MessageSchema &schema_to_import,
+								   const MessageSchema &from_schema) {
+	std::filesystem::path path_of_schema_to_import(
+		schema_to_import.schema_path);
+	path_of_schema_to_import.replace_extension(".np.js");
+	const std::filesystem::path import_path = std::filesystem::relative(
+		path_of_schema_to_import, from_schema.schema_path.parent_path());
+	std::string import_path_string = import_path.string();
+
+	if (import_path_string[0] != '.') {
+		import_path_string.insert(0, "./");
+	}
+
+	return import_path_string;
+}
 
 TsGenerator::TsGenerator()
 	: user_defined_message_type_generator(
@@ -47,6 +65,8 @@ TsGenerator::TsGenerator()
 	data_type_generator_registry->add_generator_for_type(
 		NanoPack::Optional::IDENTIFIER,
 		std::make_shared<TsOptionalGenerator>(data_type_generator_registry));
+	data_type_generator_registry->set_message_generator(
+		user_defined_message_type_generator);
 }
 
 void TsGenerator::generate_for_schema(const MessageSchema &schema) {
@@ -69,25 +89,25 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	// clang-format on
 
 	if (has_parent_message) {
-		std::filesystem::path parent_message_path(
-			schema.parent_message->schema_path);
-		parent_message_path.replace_extension(".np.js");
-		std::filesystem::path import_path =
-			relative(parent_message_path, schema.schema_path.parent_path());
-		std::string import_path_string = import_path.string();
-
-		if (import_path_string[0] != '.') {
-			import_path_string.insert(0, "./");
-		}
-
+		// clang-format off
 		code_output.stream()
-			<< "import { " << schema.parent_message->message_name
-			<< " } from \"" << import_path_string << "\";" << std::endl
-			<< std::endl;
+		<< "import { " << schema.parent_message->message_name << " } from \"" << resolve_ts_import_path(*schema.parent_message, schema) << "\";" << std::endl;
+		// clang-format on
+	}
+
+	if (schema.is_inherited) {
+		for (const std::shared_ptr<MessageSchema> &child_message :
+			 schema.child_messages) {
+			// clang-format off
+			code_output.stream()
+			<< "import { " << child_message->message_name << " } from \"" << resolve_ts_import_path(*child_message, schema) << "\";" << std::endl;
+			// clang-format on
+		}
 	}
 
 	// clang-format off
 	code_output.stream()
+	<< std::endl
 	<< "class " << schema.message_name << (has_parent_message ? " extends " + schema.parent_message->message_name : " implements NanoPackMessage") << "{" << std::endl
 	<< "    public static TYPE_ID = " << schema.type_id << ";" << std::endl
 	<< std::endl
@@ -135,9 +155,39 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< std::endl
 	<< "public static fromBytes(bytes: Uint8Array): { bytesRead: number, result: " << schema.message_name << " } | null {" << std::endl
 	<< "    const reader = new NanoBufReader(bytes);" << std::endl
-	<< "    if (reader.readTypeId() !== " << schema.message_name << ".TYPE_ID) {" << std::endl
-	<< "        return null;" << std::endl
-	<< "    }"
+	<< "    const typeId = reader.readTypeId();" << std::endl;
+	// clang-format on
+
+	if (schema.is_inherited) {
+		// clang-format off
+		code_output.stream()
+		<< "switch (typeId) {" << std::endl
+		<< "    case " << schema.type_id << ": break" << std::endl;
+		// clang-format on
+
+		for (const std::shared_ptr<MessageSchema> &child_schema :
+			 schema.child_messages) {
+			// clang-format off
+			code_output.stream()
+			<< "case " << child_schema->type_id << ": return " << child_schema->message_name << ".fromBytes(bytes);";
+			// clang-format on
+		}
+		// clang-format off
+		code_output.stream()
+		<< "default: return null;" << std::endl
+		<< "}" << std::endl;
+		// clang-format on
+	} else {
+		// clang-format off
+		code_output.stream()
+		<< "if (typeId !== " << schema.type_id << ") {" << std::endl
+		<< "    return null;" << std::endl
+		<< "}" << std::endl;
+		// clang-format on
+	}
+
+	// clang-format off
+	code_output.stream()
 	<< std::endl
 	<< "    let ptr = " << (schema.all_fields.size() + 1) * 4 << ";" << std::endl
 	<< std::endl;
