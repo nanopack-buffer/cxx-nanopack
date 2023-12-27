@@ -13,8 +13,7 @@ class Widget implements NanoPackMessage {
     bytes: Uint8Array,
   ): { bytesRead: number; result: Widget } | null {
     const reader = new NanoBufReader(bytes);
-    const typeId = reader.readTypeId();
-    switch (typeId) {
+    switch (reader.readTypeId()) {
       case 1:
         break;
       case 2:
@@ -29,6 +28,10 @@ class Widget implements NanoPackMessage {
     ptr += 4;
 
     return { bytesRead: ptr, result: new Widget(id) };
+  }
+
+  public get typeId(): number {
+    return 1;
   }
 
   public bytes(): Uint8Array {

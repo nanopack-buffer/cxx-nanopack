@@ -207,6 +207,10 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< ") };" << std::endl
 	<< "}" << std::endl
 	<< std::endl
+	<< (has_parent_message ? "override " : "") << "public get typeId(): number {" << std::endl
+	<< "    return " << schema.type_id << ";" << std::endl
+	<< "}" << std::endl
+	<< std::endl
 	<< (has_parent_message ? "override " : "") << "public bytes(): Uint8Array {" << std::endl
 	<< "    const writer = new NanoBufWriter(" << (schema.all_fields.size() + 1) * 4 << ");" << std::endl
 	<< "    writer.writeTypeId(" << schema.message_name << ".TYPE_ID);" << std::endl

@@ -18,10 +18,6 @@ class Text extends Widget {
     bytes: Uint8Array,
   ): { bytesRead: number; result: Text } | null {
     const reader = new NanoBufReader(bytes);
-    const typeId = reader.readTypeId();
-    if (typeId !== 2) {
-      return null;
-    }
 
     let ptr = 12;
 
@@ -33,6 +29,10 @@ class Text extends Widget {
     ptr += contentByteLength;
 
     return { bytesRead: ptr, result: new Text(id, content) };
+  }
+
+  public override get typeId(): number {
+    return 2;
   }
 
   public override bytes(): Uint8Array {

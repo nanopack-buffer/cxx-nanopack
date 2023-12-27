@@ -59,6 +59,10 @@ class Person implements NanoPackMessage {
     };
   }
 
+  public get typeId(): number {
+    return 1;
+  }
+
   public bytes(): Uint8Array {
     const writer = new NanoBufWriter(24);
     writer.writeTypeId(Person.TYPE_ID);
