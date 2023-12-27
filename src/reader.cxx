@@ -3,6 +3,10 @@
 NanoPack::Reader::Reader(std::vector<uint8_t>::const_iterator begin)
 	: buf_begin(begin) {}
 
+std::vector<uint8_t>::const_iterator NanoPack::Reader::begin() const {
+	return buf_begin;
+}
+
 int32_t NanoPack::Reader::read_type_id() const { return read_int32(0); }
 
 int8_t NanoPack::Reader::read_int8(int offset) const {

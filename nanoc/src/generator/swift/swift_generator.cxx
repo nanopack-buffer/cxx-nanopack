@@ -165,10 +165,6 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 	// clang-format off
 	code_output.stream()
 	<< "    required init?(data: Data) {" << std::endl
-	<< "        guard data.readTypeID() == " << schema.message_name << "_typeID else {" << std::endl
-	<< "            return nil" << std::endl
-	<< "        }" << std::endl
-	<< std::endl
 	<< "        var ptr = " << (schema.all_fields.size() + 1) * 4 << std::endl
 	<< std::endl;
 	// clang-format on

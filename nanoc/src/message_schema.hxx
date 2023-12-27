@@ -38,8 +38,21 @@ struct MessageSchema {
 
 	std::vector<std::shared_ptr<MessageSchema>> imported_messages;
 
+	/**
+	 * The message that this message inherited from.
+	 * nullptr if this message does not inherit any message.
+	 */
 	std::shared_ptr<MessageSchema> parent_message;
 
+	/**
+	 * Messages that inherited from this message.
+	 * Empty if there is no message that inherits from this message.
+	 */
+	std::vector<std::shared_ptr<MessageSchema>> child_messages;
+
+	/**
+	 * Whether there is any message that inherits from this message.
+	 */
 	bool is_inherited;
 
 	/**

@@ -17,9 +17,7 @@ class Person implements NanoPackMessage {
     bytes: Uint8Array,
   ): { bytesRead: number; result: Person } | null {
     const reader = new NanoBufReader(bytes);
-    if (reader.readTypeId() !== Person.TYPE_ID) {
-      return null;
-    }
+
     let ptr = 24;
 
     const firstNameByteLength = reader.readFieldSize(0);

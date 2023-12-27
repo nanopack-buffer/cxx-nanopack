@@ -14,10 +14,6 @@ class Text: Widget {
   }
 
   required init?(data: Data) {
-    guard data.readTypeID() == Text_typeID else {
-      return nil
-    }
-
     var ptr = 12
 
     let id: Int32 = data.read(at: ptr)

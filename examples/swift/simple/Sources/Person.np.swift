@@ -21,10 +21,6 @@ class Person: NanoPackMessage {
   }
 
   required init?(data: Data) {
-    guard data.readTypeID() == Person_typeID else {
-      return nil
-    }
-
     var ptr = 24
 
     let firstNameSize = data.readSize(ofField: 0)

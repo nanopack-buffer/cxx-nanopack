@@ -6,11 +6,8 @@ Text::Text(int32_t id, std::string content)
     : Widget(id), content(std::move(content)) {}
 
 Text::Text(const NanoPack::Reader &reader, int &bytes_read) : Widget() {
+  const auto begin = reader.begin();
   int ptr = 12;
-
-  if (reader.read_type_id() != TYPE_ID) {
-    throw "incompatible type";
-  }
 
   const int32_t id = reader.read_int32(ptr);
   ptr += sizeof(int32_t);

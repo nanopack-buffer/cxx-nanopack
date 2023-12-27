@@ -2,6 +2,8 @@
 
 import { NanoBufReader, NanoBufWriter, type NanoPackMessage } from "nanopack";
 
+import { Text } from "./text.np.js";
+
 class Widget implements NanoPackMessage {
   public static TYPE_ID = 1;
 
@@ -11,9 +13,16 @@ class Widget implements NanoPackMessage {
     bytes: Uint8Array,
   ): { bytesRead: number; result: Widget } | null {
     const reader = new NanoBufReader(bytes);
-    if (reader.readTypeId() !== Widget.TYPE_ID) {
-      return null;
+    const typeId = reader.readTypeId();
+    switch (typeId) {
+      case 1:
+        break;
+      case 2:
+        return Text.fromBytes(bytes);
+      default:
+        return null;
     }
+
     let ptr = 8;
 
     const id = reader.readInt32(ptr);

@@ -1,13 +1,11 @@
 #include "ts_generator.hxx"
 
-#include "../../../../../../../.conan2/p/rapid4cabb31a09329/p/include/rapidjson/error/error.h"
 #include "../../data_type/np_array.hxx"
 #include "../../data_type/np_bool.hxx"
 #include "../../data_type/np_int32.hxx"
 #include "../../data_type/np_int64.hxx"
 #include "../../data_type/np_int8.hxx"
 #include "../../data_type/np_map.hxx"
-#include "../../data_type/np_message.hxx"
 #include "../../data_type/np_optional.hxx"
 #include "../../data_type/np_string.hxx"
 #include "../../string_util/case_conv.hxx"
@@ -154,14 +152,13 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	code_output.stream()
 	<< std::endl
 	<< "public static fromBytes(bytes: Uint8Array): { bytesRead: number, result: " << schema.message_name << " } | null {" << std::endl
-	<< "    const reader = new NanoBufReader(bytes);" << std::endl
-	<< "    const typeId = reader.readTypeId();" << std::endl;
+	<< "    const reader = new NanoBufReader(bytes);" << std::endl;
 	// clang-format on
 
 	if (schema.is_inherited) {
 		// clang-format off
 		code_output.stream()
-		<< "switch (typeId) {" << std::endl
+		<< "switch (reader.readTypeId()) {" << std::endl
 		<< "    case " << schema.type_id << ": break" << std::endl;
 		// clang-format on
 
@@ -175,13 +172,6 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 		// clang-format off
 		code_output.stream()
 		<< "default: return null;" << std::endl
-		<< "}" << std::endl;
-		// clang-format on
-	} else {
-		// clang-format off
-		code_output.stream()
-		<< "if (typeId !== " << schema.type_id << ") {" << std::endl
-		<< "    return null;" << std::endl
 		<< "}" << std::endl;
 		// clang-format on
 	}

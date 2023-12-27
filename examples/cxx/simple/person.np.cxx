@@ -9,14 +9,9 @@ Person::Person(std::string first_name, std::optional<std::string> middle_name,
       last_name(std::move(last_name)), age(age),
       other_friend(std::move(other_friend)) {}
 
-Person::Person(const std::vector<uint8_t>::const_iterator begin,
-               int &bytes_read) {
-  const NanoPack::Reader reader(begin);
+Person::Person(const NanoPack::Reader &reader, int &bytes_read) {
+  const auto begin = reader.begin();
   int ptr = 24;
-
-  if (reader.read_type_id() != TYPE_ID) {
-    throw "incompatible type";
-  }
 
   const int32_t first_name_size = reader.read_field_size(0);
   first_name = reader.read_string(ptr, first_name_size);
@@ -49,6 +44,9 @@ Person::Person(const std::vector<uint8_t>::const_iterator begin,
 
   bytes_read = ptr;
 }
+
+Person::Person(std::vector<uint8_t>::const_iterator begin, int &bytes_read)
+    : Person(NanoPack::Reader(begin), bytes_read) {}
 
 std::vector<uint8_t> Person::data() const {
   std::vector<uint8_t> buf(sizeof(int32_t) * 6);

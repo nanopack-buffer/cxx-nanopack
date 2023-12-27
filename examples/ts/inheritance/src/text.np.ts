@@ -18,9 +18,11 @@ class Text extends Widget {
     bytes: Uint8Array,
   ): { bytesRead: number; result: Text } | null {
     const reader = new NanoBufReader(bytes);
-    if (reader.readTypeId() !== Text.TYPE_ID) {
+    const typeId = reader.readTypeId();
+    if (typeId !== 2) {
       return null;
     }
+
     let ptr = 12;
 
     const id = reader.readInt32(ptr);

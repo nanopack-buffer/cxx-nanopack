@@ -21,11 +21,8 @@ std::unique_ptr<Widget> Widget::from(std::vector<uint8_t>::const_iterator begin,
 Widget::Widget(int32_t id) : id(id) {}
 
 Widget::Widget(const NanoPack::Reader &reader, int &bytes_read) {
+  const auto begin = reader.begin();
   int ptr = 8;
-
-  if (reader.read_type_id() != TYPE_ID) {
-    throw "incompatible type";
-  }
 
   const int32_t id = reader.read_int32(ptr);
   ptr += sizeof(int32_t);

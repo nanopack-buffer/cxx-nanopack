@@ -330,11 +330,8 @@ void CxxGenerator::generate_code_file(const MessageSchema &schema,
 
 	// clang-format off
 	output_file.stream() << "{" << std::endl
+	<< "const auto begin = reader.begin();" << std::endl
 	<< "int ptr = " << 4 * (schema.all_fields.size() + 1) << ";" << std::endl
-	<< std::endl
-	<< "if (reader.read_type_id() != TYPE_ID) {" << std::endl
-	<< "  throw \"incompatible type\";" << std::endl
-	<< "}" << std::endl
 	<< std::endl;
 	// clang-format on
 

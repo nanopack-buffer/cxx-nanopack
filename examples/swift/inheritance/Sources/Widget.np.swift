@@ -21,10 +21,6 @@ class Widget: NanoPackMessage {
   }
 
   required init?(data: Data) {
-    guard data.readTypeID() == Widget_typeID else {
-      return nil
-    }
-
     var ptr = 8
 
     let id: Int32 = data.read(at: ptr)

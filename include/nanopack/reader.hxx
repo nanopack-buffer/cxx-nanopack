@@ -14,6 +14,8 @@ class Reader {
   public:
 	explicit Reader(std::vector<uint8_t>::const_iterator begin);
 
+	[[nodiscard]] std::vector<uint8_t>::const_iterator begin() const;
+
 	[[nodiscard]] int32_t read_type_id() const;
 
 	[[nodiscard]] int32_t read_field_size(int field_number) const;

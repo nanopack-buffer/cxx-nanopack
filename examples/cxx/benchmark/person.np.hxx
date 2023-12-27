@@ -4,6 +4,7 @@
 #define PERSON_NP_HXX
 
 #include <nanopack/message.hxx>
+#include <nanopack/reader.hxx>
 #include <optional>
 #include <string>
 #include <vector>
@@ -24,6 +25,8 @@ struct Person : NanoPack::Message {
          std::shared_ptr<Person> other_friend);
 
   Person(std::vector<uint8_t>::const_iterator begin, int &bytes_read);
+
+  Person(const NanoPack::Reader &reader, int &bytes_read);
 
   [[nodiscard]] std::vector<uint8_t> data() const override;
 };
