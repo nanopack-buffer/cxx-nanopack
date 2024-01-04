@@ -211,8 +211,14 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< "    return " << schema.type_id << ";" << std::endl
 	<< "}" << std::endl
 	<< std::endl
-	<< (has_parent_message ? "override " : "") << "public bytes(): Uint8Array {" << std::endl
-	<< "    const writer = new NanoBufWriter(" << (schema.all_fields.size() + 1) * 4 << ");" << std::endl
+	<< (has_parent_message ? "override " : "") << "public bytes(withLengthPrefix: boolean = false): Uint8Array {" << std::endl;
+	// clang-format on
+
+	const auto writer_initial_size = (schema.all_fields.size() + 1) * 4;
+
+	// clang-format off
+	code_output.stream()
+	<< "    const writer = new NanoBufWriter(withLengthPrefix ? " << writer_initial_size + 4 << " : " << writer_initial_size << ");" << std::endl
 	<< "    writer.writeTypeId(" << schema.message_name << ".TYPE_ID);" << std::endl
 	<< std::endl;
 	// clang-format on
@@ -229,6 +235,10 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 
 	// clang-format off
 	code_output.stream()
+	<< "    if (withLengthPrefix) {" << std::endl
+	<< "        writer.writeLength(writer.currentSize - 4)" << std::endl
+	<< "    }" << std::endl
+	<< std::endl
 	<< "    return writer.bytes;" << std::endl
 	<< "}" << std::endl
 	<< "}" << std::endl

@@ -80,7 +80,9 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< std::endl
 	<< "let " << schema.message_name << "_typeID: TypeID = " << schema.type_id << std::endl
 	<< std::endl
-	<< "class " << schema.message_name << " : " << (has_parent_message ? schema.parent_message->message_name : "NanoPackMessage") << " {" << std::endl;
+	<< "class " << schema.message_name << " : " << (has_parent_message ? schema.parent_message->message_name : "NanoPackMessage") << " {" << std::endl
+	<< "    let typeID: TypeID = " << schema.type_id << std::endl
+	<< std::endl;
 	// clang-format on
 
 	for (const MessageField &field : schema.declared_fields) {
@@ -165,7 +167,7 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 	// clang-format off
 	code_output.stream()
 	<< "    required init?(data: Data) {" << std::endl
-	<< "        var ptr = " << (schema.all_fields.size() + 1) * 4 << std::endl
+	<< "        var ptr = data.startIndex + " << (schema.all_fields.size() + 1) * 4 << std::endl
 	<< std::endl;
 	// clang-format on
 
