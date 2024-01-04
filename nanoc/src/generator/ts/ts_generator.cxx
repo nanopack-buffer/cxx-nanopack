@@ -211,15 +211,15 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< "    return " << schema.type_id << ";" << std::endl
 	<< "}" << std::endl
 	<< std::endl
-	<< (has_parent_message ? "override " : "") << "public bytes(withLengthPrefix: boolean = false): Uint8Array {" << std::endl;
+	<< (has_parent_message ? "override " : "") << "public bytes(): Uint8Array {" << std::endl;
 	// clang-format on
 
 	const auto writer_initial_size = (schema.all_fields.size() + 1) * 4;
 
 	// clang-format off
 	code_output.stream()
-	<< "    const writer = new NanoBufWriter(withLengthPrefix ? " << writer_initial_size + 4 << " : " << writer_initial_size << ");" << std::endl
-	<< "    writer.writeTypeId(" << schema.message_name << ".TYPE_ID);" << std::endl
+	<< "    const writer = new NanoBufWriter(" << writer_initial_size << ");" << std::endl
+	<< "    writer.writeTypeId(" << schema.type_id << ");" << std::endl
 	<< std::endl;
 	// clang-format on
 
@@ -235,13 +235,32 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 
 	// clang-format off
 	code_output.stream()
-	<< "    if (withLengthPrefix) {" << std::endl
-	<< "        writer.writeLength(writer.currentSize - 4)" << std::endl
-	<< "    }" << std::endl
+	<< "    return writer.bytes;" << std::endl
+	<< "}" << std::endl // bytes()
+	<< std::endl
+	<< (has_parent_message ? "override " : "") << "public bytesWithLengthPrefix(): Uint8Array {" << std::endl
+	<< "    const writer = new NanoBufWriter(" << writer_initial_size + 4 << ", true);" << std::endl
+	<< "    writer.writeTypeId(" << schema.type_id << ");" << std::endl
+	<< std::endl;
+	// clang-format on
+
+	for (const MessageField &field : schema.all_fields) {
+		const std::shared_ptr<DataTypeCodeGenerator> generator =
+			find_generator_for_field(field);
+		if (generator == nullptr)
+			continue;
+
+		generator->generate_write_code(code_output, field);
+		code_output.stream() << std::endl;
+	}
+
+	// clang-format off
+	code_output.stream()
+	<< "    writer.writeLengthPrefix(writer.currentSize - 4)" << std::endl
 	<< std::endl
 	<< "    return writer.bytes;" << std::endl
-	<< "}" << std::endl
-	<< "}" << std::endl
+	<< "}" << std::endl // bytesWithLengthPrefix()
+	<< "}" << std::endl // class
 	<< std::endl
 	<< "export { " << schema.message_name << " };" << std::endl;
 	// clang-format on

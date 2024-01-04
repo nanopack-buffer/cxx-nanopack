@@ -167,7 +167,7 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 	// clang-format off
 	code_output.stream()
 	<< "    required init?(data: Data) {" << std::endl
-	<< "        var ptr = data.startIndex + " << (schema.all_fields.size() + 1) * 4 << std::endl
+	<< "        var ptr = " << (schema.all_fields.size() + 1) * 4 << std::endl
 	<< std::endl;
 	// clang-format on
 
@@ -277,7 +277,7 @@ void SwiftGenerator::generate_message_factory(
 
 std::shared_ptr<DataTypeCodeGenerator>
 SwiftGenerator::find_generator_for_field(const MessageField &field) {
-	const auto generator =
+	auto generator =
 		data_type_generator_registry->find_generator_for_type(field.type.get());
 	if (generator == nullptr) {
 		return user_defined_message_type_generator;
