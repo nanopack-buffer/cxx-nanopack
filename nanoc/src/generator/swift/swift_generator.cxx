@@ -81,7 +81,7 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< "let " << schema.message_name << "_typeID: TypeID = " << schema.type_id << std::endl
 	<< std::endl
 	<< "class " << schema.message_name << " : " << (has_parent_message ? schema.parent_message->message_name : "NanoPackMessage") << " {" << std::endl
-	<< "    let typeID: TypeID = " << schema.type_id << std::endl
+	<< "    " << (has_parent_message ? "override " : "") << "var typeID: TypeID { return " << schema.type_id << " }" << std::endl
 	<< std::endl;
 	// clang-format on
 
