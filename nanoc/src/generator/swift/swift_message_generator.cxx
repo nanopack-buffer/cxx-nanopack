@@ -70,6 +70,12 @@ void SwiftMessageGenerator::generate_read_code(CodeOutput &output,
 	<< "let " << field_name_camel_case << "Size = data.readSize(ofField: " << field.field_number << ")" << std::endl;
 	// clang-format on
 
+	const bool is_message_inherited =
+		output.get_message_schema().find_imported_schema(message_type_name) !=
+		nullptr;
+	const std::string factory_func_name =
+		is_message_inherited ? message_type_name + ".from" : message_type_name;
+
 	if (is_self_referencing) {
 		if (!output.is_variable_in_scope(field_name_camel_case)) {
 			// clang-format off
@@ -82,18 +88,18 @@ void SwiftMessageGenerator::generate_read_code(CodeOutput &output,
 		<< "if " << field_name_camel_case << "Size < 0 {" << std::endl
 		<< "    " << field_name_camel_case << " = nil" << std::endl
 		<< "} else {" << std::endl
-		<< "    " << field_name_camel_case << " = " << field.type->identifier() << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size])" << std::endl
+		<< "    " << field_name_camel_case << " = " << factory_func_name << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size])" << std::endl
 		<< "}" << std::endl;
 		// clang-format on
 	} else if (output.is_variable_in_scope(field_name_camel_case)) {
 		// clang-format off
 		output.stream()
-		<< field_name_camel_case << " = " << field.type->identifier() << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size])" << std::endl;
+		<< field_name_camel_case << " = " << factory_func_name << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size])" << std::endl;
 		// clang-format on
 	} else {
 		// clang-format off
 		output.stream()
-		<< "guard let " << field_name_camel_case << " = " << field.type->identifier() << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size]) else {" << std::endl
+		<< "guard let " << field_name_camel_case << " = " << factory_func_name << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size]) else {" << std::endl
 		<< "    return nil" << std::endl
 		<< "}" << std::endl;
 		// clang-format on
