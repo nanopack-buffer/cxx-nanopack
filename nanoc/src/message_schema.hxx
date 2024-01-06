@@ -74,6 +74,9 @@ struct MessageSchema {
 	std::vector<MessageField> declared_fields;
 
 	std::vector<MessageField> all_fields;
+
+	[[nodiscard]] std::shared_ptr<MessageSchema>
+	find_imported_schema(const std::string &message_name) const;
 };
 
 #endif // NANOPACK_NANOC_MESSAGE_SCHEMA_HXX

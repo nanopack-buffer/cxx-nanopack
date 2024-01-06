@@ -12,6 +12,13 @@ class TsGenerator final : public Generator {
 	[[nodiscard]] std::shared_ptr<DataTypeCodeGenerator>
 	find_generator_for_field(const MessageField &field) const;
 
+	/**
+	 * \brief Generates a factor function for creating child messages of a
+	 * message if the message defined by the schema is inherited by at least one
+	 * message.
+	 */
+	void generate_factory_file(const MessageSchema &schema);
+
   public:
 	TsGenerator();
 

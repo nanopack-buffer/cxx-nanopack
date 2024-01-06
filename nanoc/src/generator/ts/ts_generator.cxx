@@ -39,6 +39,22 @@ std::string resolve_ts_import_path(const MessageSchema &schema_to_import,
 	return import_path_string;
 }
 
+std::string resolve_ts_import_path(const std::filesystem::path &path_to_import,
+								   const std::filesystem::path &from_path) {
+	const std::filesystem::path import_path =
+		relative(path_to_import, from_path);
+	std::string import_path_string = import_path.string();
+	if (import_path_string[0] != '.') {
+		import_path_string.insert(0, "./");
+	}
+	return import_path_string;
+}
+
+void format_file(const std::filesystem::path &path) {
+	const std::string format_cmd = "npx prettier " + path.string() + " --write";
+	system(format_cmd.c_str());
+}
+
 TsGenerator::TsGenerator()
 	: user_defined_message_type_generator(
 		  std::make_shared<TsMessageGenerator>()),
@@ -86,21 +102,38 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	<< std::endl;
 	// clang-format on
 
+	for (const std::shared_ptr<MessageSchema> &imported_message :
+		 schema.imported_messages) {
+		// import class definition of all imported messages.
+		// if the imported message is inherited, then its factory function needs
+		// to be imported as well for use when reading the field that stores the
+		// imported message.
+
+		// clang-format off
+		code_output.stream()
+		<< "import { " << imported_message->message_name << " } from \"" << resolve_ts_import_path(*imported_message, schema) << "\";" << std::endl;
+		// clang-format on
+
+		if (imported_message->is_inherited) {
+			std::filesystem::path factory_file_path(
+				imported_message->schema_path);
+			factory_file_path
+				.replace_filename(
+					"make-" + pascal_to_kebab(imported_message->message_name))
+				.replace_extension(".np.js");
+
+			// clang-format off
+			code_output.stream()
+			<< "import { make" << imported_message->message_name << " } from \"" << resolve_ts_import_path(factory_file_path, schema.schema_path.parent_path()) << "\";" << std::endl;
+			// clang-format on
+		}
+	}
+
 	if (has_parent_message) {
 		// clang-format off
 		code_output.stream()
 		<< "import { " << schema.parent_message->message_name << " } from \"" << resolve_ts_import_path(*schema.parent_message, schema) << "\";" << std::endl;
 		// clang-format on
-	}
-
-	if (schema.is_inherited) {
-		for (const std::shared_ptr<MessageSchema> &child_message :
-			 schema.child_messages) {
-			// clang-format off
-			code_output.stream()
-			<< "import { " << child_message->message_name << " } from \"" << resolve_ts_import_path(*child_message, schema) << "\";" << std::endl;
-			// clang-format on
-		}
 	}
 
 	// clang-format off
@@ -152,33 +185,11 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 	code_output.stream()
 	<< std::endl
 	<< "public static fromBytes(bytes: Uint8Array): { bytesRead: number, result: " << schema.message_name << " } | null {" << std::endl
-	<< "    const reader = new NanoBufReader(bytes);" << std::endl;
-	// clang-format on
-
-	if (schema.is_inherited) {
-		// clang-format off
-		code_output.stream()
-		<< "switch (reader.readTypeId()) {" << std::endl
-		<< "    case " << schema.type_id << ": break" << std::endl;
-		// clang-format on
-
-		for (const std::shared_ptr<MessageSchema> &child_schema :
-			 schema.child_messages) {
-			// clang-format off
-			code_output.stream()
-			<< "case " << child_schema->type_id << ": return " << child_schema->message_name << ".fromBytes(bytes);";
-			// clang-format on
-		}
-		// clang-format off
-		code_output.stream()
-		<< "default: return null;" << std::endl
-		<< "}" << std::endl;
-		// clang-format on
-	}
-
-	// clang-format off
-	code_output.stream()
+	<< "    const reader = new NanoBufReader(bytes);" << std::endl
+	<< "    return " << schema.message_name << ".fromReader(reader);" << std::endl
+	<< "}" << std::endl
 	<< std::endl
+	<< "public static fromReader(reader: NanoBufReader): { bytesRead: number, result: " << schema.message_name << " } | null {" << std::endl
 	<< "    let ptr = " << (schema.all_fields.size() + 1) * 4 << ";" << std::endl
 	<< std::endl;
 	// clang-format on
@@ -267,9 +278,11 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 
 	output_file_stream.close();
 
-	const std::string format_cmd =
-		"npx prettier " + output_path.string() + " --write";
-	system(format_cmd.c_str());
+	format_file(output_path);
+
+	if (schema.is_inherited) {
+		generate_factory_file(schema);
+	}
 }
 
 void TsGenerator::generate_message_factory(
@@ -335,4 +348,60 @@ TsGenerator::find_generator_for_field(const MessageField &field) const {
 	if (generator == nullptr)
 		return user_defined_message_type_generator;
 	return generator;
+}
+
+void TsGenerator::generate_factory_file(const MessageSchema &schema) {
+	std::ofstream file_stream;
+	std::filesystem::path output_path(schema.schema_path);
+	output_path
+		.replace_filename("make-" + snake_to_kebab(output_path.filename()))
+		.replace_extension(CODE_FILE_EXT);
+
+	file_stream.open(output_path);
+
+	// clang-format off
+	file_stream
+	<< "// AUTOMATICALLY GENERATED BY NANOPACK. DO NOT MODIFY BY HAND." << std::endl
+	<< std::endl
+	<< "import { NanoBufReader } from \"nanopack\";" << std::endl
+	<< "import { " << schema.message_name << " } from \"./" << pascal_to_kebab(schema.message_name) << ".np.js\";" << std::endl;
+	// clang-format on
+
+	for (const std::shared_ptr<MessageSchema> &child_message :
+		 schema.child_messages) {
+		// clang-format off
+		file_stream
+		<< "import { " << child_message->message_name << " } from \"./" << resolve_ts_import_path(*child_message, schema) << "\";" << std::endl;
+		// clang-format on
+	}
+
+	// clang-format off
+	file_stream
+	<< std::endl
+	<< "function make" << schema.message_name << "(bytes: Uint8Array) {" << std::endl
+	<< "    const reader = new NanoBufReader(bytes);" << std::endl
+	<< "    switch (reader.readTypeId()) {" << std::endl
+	<< "    case " << schema.type_id << ": return " << schema.message_name << ".fromReader(reader);" << std::endl;
+	// clang-format on
+
+	for (const std::shared_ptr<MessageSchema> &child_schema :
+		 schema.child_messages) {
+		// clang-format off
+		file_stream
+		<< "case " << child_schema->type_id << ": return " << child_schema->message_name << ".fromReader(reader);" << std::endl;
+		// clang-format on
+	}
+
+	// clang-format off
+	file_stream
+	<< "    default: return null;" << std::endl
+	<< "    }" << std::endl // switch
+	<< "}" << std::endl // function
+	<< std::endl
+	<< "export { make" <<schema.message_name << " };" << std::endl;
+	// clang-format on
+
+	file_stream.close();
+
+	format_file(output_path);
 }

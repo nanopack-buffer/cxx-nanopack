@@ -50,7 +50,7 @@ void TsMessageGenerator::generate_read_code(CodeOutput &output,
 											const std::string &var_name) {
 	// clang-format off
 	output.stream()
-	<< "const maybe_" << var_name << " = " << type->identifier() << ".fromBytes(bytes.subarray(ptr));" << std::endl
+	<< "const maybe_" << var_name << " = " << type->identifier() << ".fromReader(reader.newReaderAt(ptr));" << std::endl
 	<< "if (!maybe_" << var_name << ") {" << std::endl
 	<< "    return null;" << std::endl
 	<< "}" << std::endl
@@ -62,16 +62,16 @@ void TsMessageGenerator::generate_read_code(CodeOutput &output,
 void TsMessageGenerator::generate_read_code(CodeOutput &output,
 											const MessageField &field) {
 	const std::string message_type_name = field.type->identifier();
-	const bool is_self_referencing =
-		output.get_message_schema().message_name == message_type_name;
+	const MessageSchema &schema = output.get_message_schema();
+	const bool is_self_referencing = schema.message_name == message_type_name;
 	const std::string field_name_camel_case = snake_to_camel(field.field_name);
 
-	// clang-format off
-	output.stream()
-	<< "const " << field_name_camel_case << "Size = reader.readFieldSize(" << field.field_number << ")" << std::endl;
-	// clang-format on
-
 	if (is_self_referencing) {
+		// clang-format off
+		output.stream()
+		<< "const " << field_name_camel_case << "Size = reader.readFieldSize(" << field.field_number << ")" << std::endl;
+		// clang-format on
+
 		if (!output.is_variable_in_scope(field_name_camel_case)) {
 			output.stream()
 				<< "let " << field_name_camel_case << "!: " << message_type_name
@@ -83,13 +83,29 @@ void TsMessageGenerator::generate_read_code(CodeOutput &output,
 		<< "if (" << field_name_camel_case << "Size < 0) {" << std::endl
 		<< "    " << field_name_camel_case << " = null" << std::endl
 		<< "} else {" << std::endl
-		<< "    const maybe_" << field_name_camel_case << " = " << message_type_name << ".fromBytes(bytes.subarray(ptr));" << std::endl
+		<< "    const maybe_" << field_name_camel_case << " = " << message_type_name << ".fromReader(reader.newReaderAt(ptr));" << std::endl
 		<< "    if (!maybe_" << field_name_camel_case << ") {" << std::endl
 		<< "        return null;" << std::endl
 		<< "    }" << std::endl
 		<< "    " << field_name_camel_case << " = maybe_" << field_name_camel_case << ".result;" << std::endl
 		<< "    ptr += " << field_name_camel_case << "Size;" << std::endl
 		<< "}" << std::endl;
+		// clang-format on
+	} else if (const auto imported_schema =
+				   schema.find_imported_schema(field.type->identifier());
+			   imported_schema != nullptr && imported_schema->is_inherited) {
+		// if the message stored by this field is inherited
+		// we use the make<MessageName> factory function to ensure]
+		// we produce the correct concrete type of the message.
+
+		// clang-format off
+		output.stream()
+		<< "const maybe_" << field_name_camel_case << " = make" << field.type->identifier() << "(reader.slice(ptr));" << std::endl
+		<< "if (!maybe_" << field_name_camel_case << ") {" << std::endl
+		<< "    return null;" << std::endl
+		<< "}" << std::endl
+		<< (output.is_variable_in_scope(field_name_camel_case) ? "" : "const ") << field_name_camel_case << " = maybe_" << field_name_camel_case << ".result;" << std::endl
+		<< "ptr += maybe_" << field_name_camel_case << ".bytesRead;" << std::endl;
 		// clang-format on
 	} else {
 		generate_read_code(output, field.type.get(), field_name_camel_case);

@@ -34,6 +34,23 @@ std::string pascal_to_screaming(const std::string &camel) {
 	return ss.str();
 }
 
+std::string pascal_to_kebab(const std::string &pascal) {
+	std::stringstream ss;
+	ss << static_cast<char>(tolower(pascal[0]));
+
+	const size_t len = pascal.length();
+	for (int i = 1; i < len; i++) {
+		const char ch = pascal[i];
+		if (isupper(ch)) {
+			ss << "-" << static_cast<char>(tolower(ch));
+		} else {
+			ss << ch;
+		}
+	}
+
+	return ss.str();
+}
+
 std::string snake_to_camel(const std::string &snake) {
 	std::stringstream camel;
 
