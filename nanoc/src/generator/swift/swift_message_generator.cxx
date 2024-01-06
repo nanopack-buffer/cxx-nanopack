@@ -89,19 +89,22 @@ void SwiftMessageGenerator::generate_read_code(CodeOutput &output,
 		<< "    " << field_name_camel_case << " = nil" << std::endl
 		<< "} else {" << std::endl
 		<< "    " << field_name_camel_case << " = " << factory_func_name << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size])" << std::endl
+		<< "    ptr += " << field_name_camel_case << "Size" << std::endl
 		<< "}" << std::endl;
 		// clang-format on
 	} else if (output.is_variable_in_scope(field_name_camel_case)) {
 		// clang-format off
 		output.stream()
-		<< field_name_camel_case << " = " << factory_func_name << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size])" << std::endl;
+		<< field_name_camel_case << " = " << factory_func_name << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size])" << std::endl
+		<< "ptr += " << field_name_camel_case << "Size" << std::endl;
 		// clang-format on
 	} else {
 		// clang-format off
 		output.stream()
 		<< "guard let " << field_name_camel_case << " = " << factory_func_name << "(data: data[ptr..<ptr + " << field_name_camel_case << "Size]) else {" << std::endl
 		<< "    return nil" << std::endl
-		<< "}" << std::endl;
+		<< "}" << std::endl
+		<< "ptr += " << field_name_camel_case << "Size" << std::endl;
 		// clang-format on
 	}
 }
