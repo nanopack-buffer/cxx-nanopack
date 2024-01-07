@@ -18,7 +18,12 @@ class Text extends Widget {
     bytes: Uint8Array,
   ): { bytesRead: number; result: Text } | null {
     const reader = new NanoBufReader(bytes);
+    return Text.fromReader(reader);
+  }
 
+  public static fromReader(
+    reader: NanoBufReader,
+  ): { bytesRead: number; result: Text } | null {
     let ptr = 12;
 
     const id = reader.readInt32(ptr);
@@ -37,13 +42,28 @@ class Text extends Widget {
 
   public override bytes(): Uint8Array {
     const writer = new NanoBufWriter(12);
-    writer.writeTypeId(Text.TYPE_ID);
+    writer.writeTypeId(2);
 
     writer.appendInt32(this.id);
     writer.writeFieldSize(0, 4);
 
     const contentByteLength = writer.appendString(this.content);
     writer.writeFieldSize(1, contentByteLength);
+
+    return writer.bytes;
+  }
+
+  public override bytesWithLengthPrefix(): Uint8Array {
+    const writer = new NanoBufWriter(16, true);
+    writer.writeTypeId(2);
+
+    writer.appendInt32(this.id);
+    writer.writeFieldSize(0, 4);
+
+    const contentByteLength = writer.appendString(this.content);
+    writer.writeFieldSize(1, contentByteLength);
+
+    writer.writeLengthPrefix(writer.currentSize - 4);
 
     return writer.bytes;
   }

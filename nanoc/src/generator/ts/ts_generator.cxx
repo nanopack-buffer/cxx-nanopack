@@ -113,27 +113,27 @@ void TsGenerator::generate_for_schema(const MessageSchema &schema) {
 		code_output.stream()
 		<< "import { " << imported_message->message_name << " } from \"" << resolve_ts_import_path(*imported_message, schema) << "\";" << std::endl;
 		// clang-format on
+	}
 
-		if (imported_message->is_inherited) {
-			std::filesystem::path factory_file_path(
-				imported_message->schema_path);
+	for (const MessageField &field : schema.all_fields) {
+		if (!field.type->is_user_defined()) {
+			continue;
+		}
+
+		const std::shared_ptr<MessageSchema> type_schema =
+			schema.find_imported_schema(field.type->identifier());
+		if (type_schema->is_inherited) {
+			std::filesystem::path factory_file_path(type_schema->schema_path);
 			factory_file_path
-				.replace_filename(
-					"make-" + pascal_to_kebab(imported_message->message_name))
+				.replace_filename("make-" +
+								  pascal_to_kebab(type_schema->message_name))
 				.replace_extension(".np.js");
 
 			// clang-format off
 			code_output.stream()
-			<< "import { make" << imported_message->message_name << " } from \"" << resolve_ts_import_path(factory_file_path, schema.schema_path.parent_path()) << "\";" << std::endl;
+			<< "import { make" << type_schema->message_name << " } from \"" << resolve_ts_import_path(factory_file_path, schema.schema_path.parent_path()) << "\";" << std::endl;
 			// clang-format on
 		}
-	}
-
-	if (has_parent_message) {
-		// clang-format off
-		code_output.stream()
-		<< "import { " << schema.parent_message->message_name << " } from \"" << resolve_ts_import_path(*schema.parent_message, schema) << "\";" << std::endl;
-		// clang-format on
 	}
 
 	// clang-format off

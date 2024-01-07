@@ -160,6 +160,25 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 		<< "    default: return nil" << std::endl
 		<< "    }" << std::endl
 		<< "}" << std::endl
+		<< std::endl
+		<< "static func from(data: Data, bytesRead: inout Int) -> " << schema.message_name << "? {" << std::endl
+		<< "    switch data.readTypeID() {" << std::endl
+		<< "    case " << schema.message_name << "_typeID: return " << schema.message_name << "(data: data, bytesRead: &bytesRead)" << std::endl;
+		// clang-format on
+
+		for (const std::shared_ptr<MessageSchema> &child_message :
+			 schema.child_messages) {
+			// clang-format off
+			code_output.stream()
+			<< "case " << child_message->message_name << "_typeID: return " << child_message->message_name << "(data: data, bytesRead: &bytesRead)" << std::endl;
+			// clang-format on
+		}
+
+		// clang-format off
+		code_output.stream()
+		<< "    default: return nil" << std::endl
+		<< "    }" << std::endl
+		<< "}" << std::endl
 		<< std::endl;
 		// clang-format on
 	}
@@ -203,8 +222,55 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 		code_output.stream() << ")" << std::endl;
 	}
 
+	code_output.clear_variables_from_scope();
+
 	// clang-format off
 	code_output.stream()
+	<< "    }" << std::endl // end init
+	<< std::endl
+	<< "    required init?(data: Data, bytesRead: inout Int) {"
+	<< "        var ptr = data.startIndex + " << (schema.all_fields.size() + 1) * 4 << std::endl
+	<< std::endl;
+	// clang-format on
+
+	for (const MessageField &field : schema.all_fields) {
+		std::shared_ptr<DataTypeCodeGenerator> generator =
+			find_generator_for_field(field);
+		if (generator != nullptr) {
+			generator->generate_read_code(code_output, field);
+			code_output.stream() << std::endl;
+		}
+	}
+
+	for (const MessageField &declared_field : schema.declared_fields) {
+		const std::string field_name_camel_case =
+			snake_to_camel(declared_field.field_name);
+		code_output.stream() << "self." << field_name_camel_case << " = "
+							 << field_name_camel_case << std::endl;
+	}
+
+	if (has_parent_message) {
+		code_output.stream() << "super.init(";
+		size_t i = 0;
+		const size_t last = schema.inherited_fields.size() - 1;
+		for (const MessageField &inherited_field : schema.inherited_fields) {
+			const std::string field_name_camel_case =
+				snake_to_camel(inherited_field.field_name);
+			code_output.stream()
+				<< field_name_camel_case << ": " << field_name_camel_case;
+			if (i++ < last) {
+				code_output.stream() << ", ";
+			}
+		}
+		code_output.stream() << ")" << std::endl;
+	}
+
+	code_output.clear_variables_from_scope();
+
+	// clang-format off
+	code_output.stream()
+	<< std::endl
+	<< "        bytesRead = ptr - data.startIndex" << std::endl
 	<< "    }" << std::endl // end init
 	<< std::endl
 	<< "    " << (has_parent_message ? "override " : "") << "func data() -> Data? {" << std::endl
@@ -227,6 +293,8 @@ void SwiftGenerator::generate_for_schema(const MessageSchema &schema) {
 			code_output.stream() << std::endl;
 		}
 	}
+
+	code_output.clear_variables_from_scope();
 
 	// clang-format off
 	code_output.stream()

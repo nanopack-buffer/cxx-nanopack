@@ -48,10 +48,17 @@ void SwiftMessageGenerator::generate_field_declaration(
 void SwiftMessageGenerator::generate_read_code(CodeOutput &output,
 											   NanoPack::DataType *type,
 											   const std::string &var_name) {
+	const std::string message_type_name = type->identifier();
+	const std::shared_ptr<MessageSchema> message_schema =
+		output.get_message_schema().find_imported_schema(message_type_name);
+	const bool is_message_inherited = message_schema->is_inherited;
+	const std::string factory_func_name =
+		is_message_inherited ? message_type_name + ".from" : message_type_name;
+
 	// clang-format off
 	output.stream()
 	<< "var " << var_name << "Size = 0" << std::endl
-	<< "guard let " << var_name << " = " << type->identifier() << "(data: data[ptr...], size: &" << var_name << "Size) else {" << std::endl
+	<< "guard let " << var_name << " = " << factory_func_name << "(data: data[ptr...], bytesRead: &" << var_name << "Size) else {" << std::endl
 	<< "    return nil" << std::endl
 	<< "}" << std::endl
 	<< "ptr += " << var_name << "Size" << std::endl;

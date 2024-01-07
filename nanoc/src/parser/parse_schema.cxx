@@ -76,7 +76,8 @@ parse_message_name_declaration(const std::string &message_name_declaration) {
 			.message_name = message_name_declaration};
 }
 
-std::optional<ParseResult> parse_schema_file(const std::filesystem::path &file_path) {
+std::optional<ParseResult>
+parse_schema_file(const std::filesystem::path &file_path) {
 	yaml_parser_t parser;
 	if (!yaml_parser_initialize(&parser)) {
 		return std::nullopt;
@@ -188,9 +189,9 @@ std::optional<ParseResult> parse_schema_file(const std::filesystem::path &file_p
 				const std::string data_type_identifier =
 					declared_type->identifier();
 
-				schema->declared_fields.emplace_back(declared_type, data_type_identifier,
-											key_name,
-											type_expression->field_number);
+				schema->declared_fields.emplace_back(
+					declared_type, data_type_identifier, key_name,
+					type_expression->field_number);
 			}
 			continue;
 		}

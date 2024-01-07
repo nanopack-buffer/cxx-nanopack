@@ -18,6 +18,8 @@ void CodeOutput::remove_variable_from_scope(const std::string &var_name) {
 	variables_in_scope.erase(var_name);
 }
 
+void CodeOutput::clear_variables_from_scope() { variables_in_scope.clear(); }
+
 bool CodeOutput::is_variable_in_scope(const std::string &var_name) {
 	return variables_in_scope.find(var_name) != variables_in_scope.end();
 }

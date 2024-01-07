@@ -2,8 +2,6 @@
 
 import { NanoBufReader, NanoBufWriter, type NanoPackMessage } from "nanopack";
 
-import { Text } from "./text.np.js";
-
 class Widget implements NanoPackMessage {
   public static TYPE_ID = 1;
 
@@ -13,15 +11,12 @@ class Widget implements NanoPackMessage {
     bytes: Uint8Array,
   ): { bytesRead: number; result: Widget } | null {
     const reader = new NanoBufReader(bytes);
-    switch (reader.readTypeId()) {
-      case 1:
-        break;
-      case 2:
-        return Text.fromBytes(bytes);
-      default:
-        return null;
-    }
+    return Widget.fromReader(reader);
+  }
 
+  public static fromReader(
+    reader: NanoBufReader,
+  ): { bytesRead: number; result: Widget } | null {
     let ptr = 8;
 
     const id = reader.readInt32(ptr);
@@ -36,10 +31,22 @@ class Widget implements NanoPackMessage {
 
   public bytes(): Uint8Array {
     const writer = new NanoBufWriter(8);
-    writer.writeTypeId(Widget.TYPE_ID);
+    writer.writeTypeId(1);
 
     writer.appendInt32(this.id);
     writer.writeFieldSize(0, 4);
+
+    return writer.bytes;
+  }
+
+  public bytesWithLengthPrefix(): Uint8Array {
+    const writer = new NanoBufWriter(12, true);
+    writer.writeTypeId(1);
+
+    writer.appendInt32(this.id);
+    writer.writeFieldSize(0, 4);
+
+    writer.writeLengthPrefix(writer.currentSize - 4);
 
     return writer.bytes;
   }

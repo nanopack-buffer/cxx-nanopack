@@ -26,9 +26,11 @@ std::vector<MessageSchema> resolve_schemas(
 				parse_result.partial_schema);
 			parent_message_schema->is_inherited = true;
 			parse_result.partial_schema->parent_message = parent_message_schema;
+			parse_result.partial_schema->imported_messages.emplace_back(
+				parent_message_schema);
 		}
 
-		// find all imported types
+		// find all imported types excluding the parent type
 		for (const std::shared_ptr<NanoPack::DataType> &unresolved_type :
 			 parse_result.unresolved_types) {
 			const auto entry =
@@ -36,8 +38,20 @@ std::vector<MessageSchema> resolve_schemas(
 			if (entry == parse_results.end()) {
 				return {};
 			}
+
+			const std::shared_ptr<MessageSchema> type_schema =
+				entry->second.partial_schema;
+
+			if (parse_result.partial_schema->parent_message != nullptr &&
+				type_schema->type_id ==
+					parse_result.partial_schema->parent_message->type_id) {
+				// encountered parent type here which is already added to the
+				// imported_messages vector
+				continue;
+			}
+
 			parse_result.partial_schema->imported_messages.emplace_back(
-				entry->second.partial_schema);
+				type_schema);
 		}
 	}
 

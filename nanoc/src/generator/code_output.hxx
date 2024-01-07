@@ -36,6 +36,8 @@ class CodeOutput {
 
 	void remove_variable_from_scope(const std::string &var_name);
 
+	void clear_variables_from_scope();
+
 	bool is_variable_in_scope(const std::string &var_name);
 };
 
