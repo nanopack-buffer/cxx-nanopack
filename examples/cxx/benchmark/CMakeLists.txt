@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25.2)
 
-find_package(rapidjson REQUIRED)
+find_package(rapidjson)
 
 add_executable(benchmark
         main.cxx
