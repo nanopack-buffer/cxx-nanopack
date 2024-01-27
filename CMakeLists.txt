@@ -16,9 +16,4 @@ add_library(nanopack
         src/writer.cxx
         src/message_stream.cxx)
 
-# include example targets
-add_subdirectory(examples/cxx/simple EXCLUDE_FROM_ALL)
-add_subdirectory(examples/cxx/benchmark EXCLUDE_FROM_ALL)
-add_subdirectory(examples/cxx/inheritance EXCLUDE_FROM_ALL)
-
 target_include_directories(nanopack PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
