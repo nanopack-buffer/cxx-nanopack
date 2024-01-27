@@ -1,6 +1,7 @@
 #ifndef NANOPACK_MESSAGE_HXX
 #define NANOPACK_MESSAGE_HXX
 
+#include <cstdint>
 #include <vector>
 
 namespace NanoPack {
