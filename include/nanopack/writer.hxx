@@ -1,8 +1,9 @@
 #ifndef NANOPACK_WRITER_HXX
 #define NANOPACK_WRITER_HXX
 
-#include <vector>
+#include <cstdint>
 #include <string>
+#include <vector>
 
 namespace NanoPack {
 

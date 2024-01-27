@@ -1,6 +1,7 @@
 #ifndef NANOPACK_READER_HXX
 #define NANOPACK_READER_HXX
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
