@@ -12,7 +12,7 @@ class Writer {
 	std::vector<uint8_t> *buffer;
 
   public:
-	Writer(std::vector<uint8_t> *buffer);
+	explicit Writer(std::vector<uint8_t> *buffer);
 
 	void write_type_id(int32_t type_id);
 
@@ -25,6 +25,7 @@ class Writer {
 	void write_int32(int32_t num, int offset);
 
 	void append_string(const std::string &str);
+	void append_string(const std::string_view &string_view);
 
 	void append_bytes(const std::vector<uint8_t> &bytes);
 
