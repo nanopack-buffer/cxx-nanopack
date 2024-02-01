@@ -12,8 +12,10 @@ add_library(nanopack
         include/nanopack/message_stream.hxx
         include/nanopack/reader.hxx
         include/nanopack/writer.hxx
+        include/nanopack/any.hxx
         src/reader.cxx
         src/writer.cxx
-        src/message_stream.cxx)
+        src/message_stream.cxx
+        src/any.cxx)
 
 target_include_directories(nanopack PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
