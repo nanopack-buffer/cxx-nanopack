@@ -26,6 +26,8 @@ class Any {
 	Any(const Message &message);
 
 	Any(std::vector<uint8_t> data);
+	Any(std::vector<uint8_t>::const_iterator start,
+		std::vector<uint8_t>::const_iterator end);
 
 	[[nodiscard]] Reader as_reader() const;
 };

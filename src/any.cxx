@@ -27,8 +27,12 @@ NanoPack::Any::Any(const Message &message) {
 	_size = data.size();
 	_data = std::move(data);
 }
+
 NanoPack::Any::Any(std::vector<uint8_t> data)
 	: _size(data.size()), _data(std::move(data)) {}
+NanoPack::Any::Any(std::vector<uint8_t>::const_iterator begin,
+				   std::vector<uint8_t>::const_iterator end)
+	: _data(begin, end), _size(data.size()) {}
 
 NanoPack::Reader NanoPack::Any::as_reader() const {
 	return Reader(data.begin());
