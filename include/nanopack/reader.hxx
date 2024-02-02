@@ -27,6 +27,8 @@ class Reader {
 
 	[[nodiscard]] int32_t read_int32(int offset) const;
 
+	[[nodiscard]] int64_t read_int64(int offset) const;
+
 	[[nodiscard]] bool read_bool(int offset) const;
 
 	[[nodiscard]] double read_double(int offset) const;

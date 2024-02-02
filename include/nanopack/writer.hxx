@@ -22,6 +22,8 @@ class Writer {
 
 	void append_int32(int32_t num);
 
+	void append_int64(int64_t num);
+
 	void write_int32(int32_t num, int offset);
 
 	void append_string(const std::string &str);
