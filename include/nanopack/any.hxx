@@ -17,7 +17,10 @@ class Any {
 	Any();
 
 	Any(const Any &other);
+	Any &operator=(const Any &other);
+
 	Any(Any &&other) noexcept;
+	Any &operator=(Any &&other) noexcept;
 
 	Any(int8_t i);
 	Any(int32_t i);

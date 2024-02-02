@@ -3,8 +3,19 @@
 NanoPack::Any::Any() : _size(0) {}
 
 NanoPack::Any::Any(const Any &other) : _size(other._size), _data(other._data) {}
+NanoPack::Any &NanoPack::Any::operator=(const Any &other) {
+	_size = other._size;
+	_data = other._data;
+	return *this;
+}
+
 NanoPack::Any::Any(Any &&other) noexcept
 	: _size(other._size), _data(std::move(other._data)) {}
+NanoPack::Any &NanoPack::Any::operator=(Any &&other) noexcept {
+	_size = other._size;
+	_data = std::move(other._data);
+	return *this;
+}
 
 NanoPack::Any::Any(int8_t i)
 	: _size(1), _data{*reinterpret_cast<uint8_t *>(&i)} {}
