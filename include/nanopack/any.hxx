@@ -14,6 +14,8 @@ class Any {
 	std::vector<uint8_t> _data;
 
   public:
+	Any();
+
 	Any(const Any &other);
 	Any(Any &&other) noexcept;
 

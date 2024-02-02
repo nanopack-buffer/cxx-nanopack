@@ -1,5 +1,7 @@
 #include <nanopack/any.hxx>
 
+NanoPack::Any::Any() : _size(0) {}
+
 NanoPack::Any::Any(const Any &other) : _size(other._size), _data(other._data) {}
 NanoPack::Any::Any(Any &&other) noexcept
 	: _size(other._size), _data(std::move(other._data)) {}
