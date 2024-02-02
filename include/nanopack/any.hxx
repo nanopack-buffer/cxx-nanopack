@@ -14,9 +14,6 @@ class Any {
 	std::vector<uint8_t> _data;
 
   public:
-	const size_t &size = _size;
-	const std::vector<uint8_t> &data = _data;
-
 	Any(const Any &other);
 	Any(Any &&other) noexcept;
 
@@ -31,6 +28,10 @@ class Any {
 	Any(std::vector<uint8_t> data);
 	Any(std::vector<uint8_t>::const_iterator start,
 		std::vector<uint8_t>::const_iterator end);
+
+	[[nodiscard]] size_t size() const;
+
+	[[nodiscard]] const std::vector<uint8_t> &data() const;
 
 	[[nodiscard]] Reader as_reader() const;
 };

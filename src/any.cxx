@@ -36,8 +36,12 @@ NanoPack::Any::Any(std::vector<uint8_t> data)
 	: _size(data.size()), _data(std::move(data)) {}
 NanoPack::Any::Any(std::vector<uint8_t>::const_iterator begin,
 				   std::vector<uint8_t>::const_iterator end)
-	: _data(begin, end), _size(data.size()) {}
+	: _size(std::distance(begin, end)), _data(begin, end) {}
+
+size_t NanoPack::Any::size() const { return _size; }
+
+const std::vector<uint8_t> &NanoPack::Any::data() const { return _data; }
 
 NanoPack::Reader NanoPack::Any::as_reader() const {
-	return Reader(data.begin());
+	return Reader(_data.begin());
 }
