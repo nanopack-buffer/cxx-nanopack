@@ -1,5 +1,9 @@
 #include <nanopack/any.hxx>
 
+NanoPack::Any::Any(const Any &other) : _size(other._size), _data(other._data) {}
+NanoPack::Any::Any(Any &&other) noexcept
+	: _size(other._size), _data(std::move(other._data)) {}
+
 NanoPack::Any::Any(int8_t i)
 	: _size(1), _data{*reinterpret_cast<uint8_t *>(&i)} {}
 NanoPack::Any::Any(int32_t i) : _size(4), _data(4) {

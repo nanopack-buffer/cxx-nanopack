@@ -17,6 +17,9 @@ class Any {
 	const size_t &size = _size;
 	const std::vector<uint8_t> &data = _data;
 
+	Any(const Any &other);
+	Any(Any &&other) noexcept;
+
 	Any(int8_t i);
 	Any(int32_t i);
 	Any(int64_t i);
