@@ -8,11 +8,11 @@ namespace NanoPack {
 
 class Message {
   public:
-	[[nodiscard]] virtual std::vector<uint8_t> data() const = 0;
-
 	virtual ~Message() = default;
 
-	virtual int32_t type_id() = 0;
+	[[nodiscard]] virtual int32_t type_id() const = 0;
+
+	[[nodiscard]] virtual std::vector<uint8_t> data() const = 0;
 };
 
 } // namespace NanoPack
