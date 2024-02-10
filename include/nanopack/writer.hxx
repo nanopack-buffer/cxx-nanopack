@@ -9,10 +9,13 @@ namespace NanoPack {
 
 class Writer {
   private:
+	int offset;
 	std::vector<uint8_t> *buffer;
 
   public:
 	explicit Writer(std::vector<uint8_t> *buffer);
+
+	Writer(std::vector<uint8_t> *buffer, int offset);
 
 	void write_type_id(int32_t type_id);
 
