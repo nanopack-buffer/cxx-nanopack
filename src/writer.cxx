@@ -1,6 +1,9 @@
 #include <nanopack/writer.hxx>
 
-NanoPack::Writer::Writer(std::vector<uint8_t> *buffer) : buffer(buffer) {}
+NanoPack::Writer::Writer(std::vector<uint8_t> *buffer) : Writer(buffer, 0) {}
+
+NanoPack::Writer::Writer(std::vector<uint8_t> *buffer, const int offset)
+	: offset(offset), buffer(buffer) {}
 
 void NanoPack::Writer::write_type_id(const TypeId type_id) {
 	(*buffer)[0] = type_id & 0x000000FF;
@@ -15,10 +18,11 @@ void NanoPack::Writer::write_field_size(const int field_number,
 }
 
 void NanoPack::Writer::write_int32(const int32_t num, const int offset) {
-	(*buffer)[offset] = num & 0x000000FF;
-	(*buffer)[offset + 1] = (num & 0x0000FF00) >> 8;
-	(*buffer)[offset + 2] = (num & 0x00FF0000) >> 16;
-	(*buffer)[offset + 3] = (num & 0xFF000000) >> 24;
+	const int p = offset + this->offset;
+	(*buffer)[p] = num & 0x000000FF;
+	(*buffer)[p + 1] = (num & 0x0000FF00) >> 8;
+	(*buffer)[p + 2] = (num & 0x00FF0000) >> 16;
+	(*buffer)[p + 3] = (num & 0xFF000000) >> 24;
 }
 
 void NanoPack::Writer::append_int8(const int8_t num) {
