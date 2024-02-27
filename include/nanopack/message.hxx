@@ -4,13 +4,15 @@
 #include <cstdint>
 #include <vector>
 
+#include "nanopack/nanopack.hxx"
+
 namespace NanoPack {
 
 class Message {
   public:
 	virtual ~Message() = default;
 
-	[[nodiscard]] virtual int32_t type_id() const = 0;
+	[[nodiscard]] virtual TypeId type_id() const = 0;
 
 	[[nodiscard]] virtual std::vector<uint8_t> data() const = 0;
 
