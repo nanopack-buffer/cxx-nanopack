@@ -7,7 +7,9 @@ std::vector<uint8_t>::const_iterator NanoPack::Reader::begin() const {
 	return buf_begin;
 }
 
-int32_t NanoPack::Reader::read_type_id() const { return read_int32(0); }
+NanoPack::TypeId NanoPack::Reader::read_type_id() const {
+	return read_uint32(0);
+}
 
 int8_t NanoPack::Reader::read_int8(int offset) const {
 	const uint8_t b = *(buf_begin + offset);
@@ -15,6 +17,32 @@ int8_t NanoPack::Reader::read_int8(int offset) const {
 	if (sign_bit == 0)
 		return static_cast<int8_t>(b);
 	return -(~b + 1);
+}
+
+uint8_t NanoPack::Reader::read_uint8(int offset) const {
+	return *(buf_begin + offset);
+}
+
+uint32_t NanoPack::Reader::read_uint32(int offset) const {
+	int32_t num = 0;
+	num |= *(buf_begin + offset);
+	num |= *(buf_begin + offset + 1) << 8;
+	num |= *(buf_begin + offset + 2) << 16;
+	num |= *(buf_begin + offset + 3) << 24;
+	return num;
+}
+
+uint64_t NanoPack::Reader::read_uint64(const int offset) const {
+	int64_t num = 0;
+	num |= *(buf_begin + offset);
+	num |= *(buf_begin + offset + 1) << 8;
+	num |= *(buf_begin + offset + 2) << 16;
+	num |= *(buf_begin + offset + 3) << 24;
+	num |= *(buf_begin + offset + 4) << 32;
+	num |= *(buf_begin + offset + 5) << 40;
+	num |= *(buf_begin + offset + 6) << 48;
+	num |= *(buf_begin + offset + 7) << 56;
+	return num;
 }
 
 int32_t NanoPack::Reader::read_int32(int offset) const {

@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "nanopack.hxx"
+
 namespace NanoPack {
 
 class Writer {
@@ -14,15 +16,18 @@ class Writer {
   public:
 	explicit Writer(std::vector<uint8_t> *buffer);
 
-	void write_type_id(int32_t type_id);
+	void write_type_id(TypeId type_id);
 
 	void write_field_size(int field_number, int32_t size);
 
 	void append_int8(int8_t num);
+	void append_uint8(uint8_t num);
 
 	void append_int32(int32_t num);
+	void append_uint32(uint32_t num);
 
 	void append_int64(int64_t num);
+	void append_uint64(uint64_t num);
 
 	void write_int32(int32_t num, int offset);
 
