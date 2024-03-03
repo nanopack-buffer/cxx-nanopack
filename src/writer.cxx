@@ -6,10 +6,10 @@ NanoPack::Writer::Writer(std::vector<uint8_t> *buffer, const int offset)
 	: offset(offset), buffer(buffer) {}
 
 void NanoPack::Writer::write_type_id(const TypeId type_id) {
-	(*buffer)[0] = type_id & 0x000000FF;
-	(*buffer)[1] = (type_id & 0x0000FF00) >> 8;
-	(*buffer)[2] = (type_id & 0x00FF0000) >> 16;
-	(*buffer)[3] = (type_id & 0xFF000000) >> 24;
+	(*buffer)[offset] = type_id & 0x000000FF;
+	(*buffer)[offset + 1] = (type_id & 0x0000FF00) >> 8;
+	(*buffer)[offset + 2] = (type_id & 0x00FF0000) >> 16;
+	(*buffer)[offset + 3] = (type_id & 0xFF000000) >> 24;
 }
 
 void NanoPack::Writer::write_field_size(const int field_number,
