@@ -19,9 +19,6 @@ class Message {
 	virtual void write_to(std::vector<uint8_t> &buf, int offset) const = 0;
 
 	[[nodiscard]] virtual std::vector<uint8_t> data() const = 0;
-
-	[[nodiscard]] virtual std::vector<uint8_t>
-	data_with_length_prefix() const = 0;
 };
 
 } // namespace NanoPack
