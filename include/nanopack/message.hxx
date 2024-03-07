@@ -4,7 +4,8 @@
 #include <cstdint>
 #include <vector>
 
-#include "nanopack/nanopack.hxx"
+#include "writer.hxx"
+#include "nanopack.hxx"
 
 namespace NanoPack {
 
@@ -13,6 +14,10 @@ class Message {
 	virtual ~Message() = default;
 
 	[[nodiscard]] virtual TypeId type_id() const = 0;
+
+	[[nodiscard]] virtual int header_size() const = 0;
+
+	virtual void write_to(Writer &writer) const = 0;
 
 	[[nodiscard]] virtual std::vector<uint8_t> data() const = 0;
 
