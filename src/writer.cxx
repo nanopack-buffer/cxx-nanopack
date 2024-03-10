@@ -17,6 +17,14 @@ void NanoPack::write_field_size(const int field_number, const int32_t size,
 	buf[p + 3] = (size & 0xFF000000) >> 24;
 }
 
+void NanoPack::write_uint32(uint32_t num, int offset,
+							std::vector<uint8_t> &buf) {
+	buf[offset] = num & 0x000000FF;
+	buf[offset + 1] = (num & 0x0000FF00) >> 8;
+	buf[offset + 2] = (num & 0x00FF0000) >> 16;
+	buf[offset + 3] = (num & 0xFF000000) >> 24;
+}
+
 void NanoPack::append_int8(const int8_t num, std::vector<uint8_t> &buf) {
 	buf.emplace_back(num);
 }

@@ -14,6 +14,8 @@ void write_type_id(TypeId type_id, int offset, std::vector<uint8_t> &buf);
 void write_field_size(int field_number, int32_t size, int offset,
 					  std::vector<uint8_t> &buf);
 
+void write_uint32(uint32_t num, int offset, std::vector<uint8_t> &buf);
+
 void append_int8(int8_t num, std::vector<uint8_t> &buf);
 void append_uint8(uint8_t num, std::vector<uint8_t> &buf);
 
