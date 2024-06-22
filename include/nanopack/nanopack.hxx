@@ -1,5 +1,7 @@
-#ifndef NANOPACK_HXX
-#define NANOPACK_HXX
+#ifndef NANOPACK__NANOPACK_HXX
+#define NANOPACK__NANOPACK_HXX
+
+#include <cstdint>
 
 namespace NanoPack {
 
@@ -7,4 +9,4 @@ typedef uint32_t TypeId;
 
 }
 
-#endif // NANOPACK_HXX
+#endif

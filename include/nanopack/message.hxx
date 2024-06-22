@@ -1,10 +1,8 @@
 #ifndef NANOPACK_MESSAGE_HXX
 #define NANOPACK_MESSAGE_HXX
 
-#include <cstdint>
-#include <vector>
-
 #include "nanopack.hxx"
+#include "nanopack/writer.hxx"
 
 namespace NanoPack {
 
@@ -14,11 +12,9 @@ class Message {
 
 	[[nodiscard]] virtual TypeId type_id() const = 0;
 
-	[[nodiscard]] virtual int header_size() const = 0;
+	[[nodiscard]] virtual size_t header_size() const = 0;
 
-	virtual size_t write_to(std::vector<uint8_t> &buf, int offset) const = 0;
-
-	[[nodiscard]] virtual std::vector<uint8_t> data() const = 0;
+	virtual size_t write_to(Writer &writer, int offset) const = 0;
 };
 
 } // namespace NanoPack
