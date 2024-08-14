@@ -1,4 +1,4 @@
-# nanopack
+# cxx-nanopack
 
 NanoPack is a binary serialization format for Poly.
 This repo contains the source code for the C++ backing library for NanoPack's generated code.
@@ -9,5 +9,5 @@ You can include this library as a git submodule and link it appropriately in you
 
 ## Requirements
 
-- CMake >= 3.25.2
+- CMake >= 3.15
 - An appropriate C++ compiler, e.g. Clang

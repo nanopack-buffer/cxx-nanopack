@@ -3,6 +3,7 @@
 #include <cstring>
 #include <nanopack/reader.hxx>
 #include <optional>
+#include <thread>
 
 NanoPack::Reader::Reader(uint8_t *buf) : buffer(buf) {}
 
