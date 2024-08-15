@@ -1,12 +1,14 @@
 #ifndef NANOPACK__RPC_HXX
 #define NANOPACK__RPC_HXX
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <future>
 #include <mutex>
 #include <random>
+#include <string_view>
 #include <unordered_map>
 
 namespace NanoPack {
@@ -100,6 +102,14 @@ class RpcClient {
 };
 
 class RpcServer {
+	RpcServerChannel &channel;
+
+  public:
+	struct MethodCallResult {
+		uint8_t *data;
+		size_t size;
+	};
+
 	struct MethodNameHash {
 		using hash_type = std::hash<std::string_view>;
 		using is_transparent = void;
@@ -115,20 +125,19 @@ class RpcServer {
 		}
 	};
 
-	using CallHandler = void (*)(uint8_t *request_data, size_t offset,
-								 MessageId msgId);
-
-	RpcServerChannel &channel;
-	std::unordered_map<std::string, CallHandler, MethodNameHash,
-					   std::equal_to<>>
-		call_handlers;
-
-  public:
 	RpcServer(RpcServerChannel &channel);
 
-	void on(const std::string &method, CallHandler handler);
-
 	void request_received(uint8_t *request_data);
+
+  protected:
+	virtual MethodCallResult on_method_call(const std::string_view &method,
+											uint8_t *request_data,
+											size_t offset, MessageId msgId) = 0;
+
+  private:
+	void handle_method_call(const std::string_view &method,
+							uint8_t *request_data, size_t offset,
+							MessageId msgId);
 };
 
 } // namespace NanoPack

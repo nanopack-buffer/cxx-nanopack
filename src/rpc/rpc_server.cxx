@@ -4,11 +4,7 @@
 #include <thread>
 
 NanoPack::RpcServer::RpcServer(NanoPack::RpcServerChannel &channel)
-	: channel(channel), call_handlers() {}
-
-void NanoPack::RpcServer::on(const std::string &method, CallHandler handler) {
-	call_handlers.emplace(method, handler);
-}
+	: channel(channel) {}
 
 void NanoPack::RpcServer::request_received(uint8_t *request_data) {
 	const uint32_t msgId = request_data[1] | request_data[2] << 8 |
@@ -19,11 +15,14 @@ void NanoPack::RpcServer::request_received(uint8_t *request_data) {
 	std::string_view method_name(
 		reinterpret_cast<const char *>(request_data[9]), method_name_size);
 
-	const auto entry = call_handlers.find(method_name);
-	if (entry == call_handlers.end()) {
-		return;
-	}
-
-	std::thread t(entry->second, request_data, 9 + method_name_size, msgId);
+	std::thread t(&NanoPack::RpcServer::on_method_call, this, request_data,
+				  9 + method_name_size, msgId);
 	t.detach();
+}
+
+void NanoPack::RpcServer::handle_method_call(const std::string_view &method,
+											 uint8_t *request_data,
+											 size_t offset, MessageId msgId) {
+	auto [data, size] = on_method_call(method, request_data, offset, msgId);
+	channel.send_response(data, size);
 }
