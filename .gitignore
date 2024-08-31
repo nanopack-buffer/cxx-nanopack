@@ -154,3 +154,4 @@ build/
 CMakeUserPresets.json
 .cache
 cmake-build-*
+result
