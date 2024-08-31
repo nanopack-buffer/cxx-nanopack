@@ -35,4 +35,6 @@ if (BUILD_TESTING)
 endif()
 
 install(TARGETS nanopack
-	DESTINATION ${CMAKE_INSTALL_PREFIX})
+	DESTINATION lib)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/nanopack"
+	DESTINATION include)
