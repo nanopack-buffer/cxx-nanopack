@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <cstdlib>
+#include <mutex>
 #include <nanopack/rpc.hxx>
 #include <unistd.h>
 
@@ -19,6 +20,8 @@ void NanoPack::StandardIoChannel::send_request(uint8_t *data, size_t size) {
 	msg_size_buf[2] = size & 0xFF0000 >> 16;
 	msg_size_buf[3] = size & 0xFF000000 >> 24;
 
+	std::lock_guard<std::mutex> guard(stdio_mutex);
+
 	write(stdin_handle, msg_size_buf, 4);
 	write(stdin_handle, data, size);
 }
@@ -29,6 +32,8 @@ void NanoPack::StandardIoChannel::send_response(uint8_t *data, size_t size) {
 	msg_size_buf[1] = size & 0xFF00 >> 8;
 	msg_size_buf[2] = size & 0xFF0000 >> 16;
 	msg_size_buf[3] = size & 0xFF000000 >> 24;
+
+	std::lock_guard<std::mutex> guard(stdio_mutex);
 
 	write(stdin_handle, msg_size_buf, 4);
 	write(stdin_handle, data, size);
@@ -53,11 +58,11 @@ void NanoPack::StandardIoChannel::read_from_stdout() {
 		read(stdout_handle, msg_data, sizeof(uint32_t));
 
 		switch (msg_data[0]) {
-		case NanoPack::RpcMessageType::REQUEST:
+		case NanoPack::RpcMessageType::Request:
 			notify_server(msg_data);
 			break;
 
-		case NanoPack::RpcMessageType::RESPONSE:
+		case NanoPack::RpcMessageType::Response:
 			notify_client(msg_data);
 			break;
 

@@ -123,6 +123,13 @@ void NanoPack::Writer::append_string(const std::string_view &str) {
 	std::memcpy(buf + start, str.data(), len);
 }
 
+void NanoPack::Writer::append_string_view(const std::string_view &string_view) {
+	const size_t start = end_ptr;
+	const size_t len = string_view.size();
+	move_end_ptr(len);
+	std::memcpy(buf + start, string_view.data(), len);
+}
+
 void NanoPack::Writer::append_bytes(const uint8_t *bytes, size_t size) {
 	const size_t start = end_ptr;
 	move_end_ptr(size);

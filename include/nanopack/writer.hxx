@@ -80,6 +80,7 @@ class Writer {
 
 	void append_string(const std::string &str);
 	void append_string(const std::string_view &str);
+	void append_string_view(const std::string_view &string_view);
 
 	void append_bytes(const uint8_t *bytes, size_t size);
 

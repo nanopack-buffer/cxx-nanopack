@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <future>
+#include <iostream>
 #include <limits>
 #include <nanopack/rpc.hxx>
 
@@ -33,6 +34,6 @@ void NanoPack::RpcClient::response_received(uint8_t *response_data) {
 	if (entry == pending_async_requests.end()) {
 		return;
 	}
-	entry->second.set_value(response_data);
+	entry->second.set_value(response_data + 5);
 	pending_async_requests.erase(msgId);
 }

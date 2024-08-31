@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <iostream>
 #include <nanopack/rpc.hxx>
 #include <string_view>
 #include <thread>
@@ -12,17 +13,17 @@ void NanoPack::RpcServer::request_received(uint8_t *request_data) {
 	const uint32_t method_name_size = request_data[5] | request_data[6] << 8 |
 									  request_data[7] << 16 |
 									  request_data[8] << 24;
-	std::string_view method_name(
-		reinterpret_cast<const char *>(request_data[9]), method_name_size);
+	std::string_view method_name(reinterpret_cast<char *>(request_data + 9),
+								 method_name_size);
 
-	std::thread t(&NanoPack::RpcServer::on_method_call, this, request_data,
-				  9 + method_name_size, msgId);
+	std::thread t(&NanoPack::RpcServer::handle_method_call, this, method_name,
+				  request_data, 9 + method_name_size, msgId);
 	t.detach();
 }
 
 void NanoPack::RpcServer::handle_method_call(const std::string_view &method,
 											 uint8_t *request_data,
 											 size_t offset, MessageId msgId) {
-	auto [data, size] = on_method_call(method, request_data, offset, msgId);
-	channel.send_response(data, size);
+	auto result = on_method_call(method, request_data, offset, msgId);
+	channel.send_response(result.data, result.size);
 }

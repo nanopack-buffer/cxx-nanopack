@@ -1,7 +1,6 @@
 #ifndef NANOPACK__RPC_HXX
 #define NANOPACK__RPC_HXX
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -15,7 +14,7 @@ namespace NanoPack {
 
 using MessageId = uint32_t;
 
-enum RpcMessageType { REQUEST = 0, RESPONSE = 1 };
+enum RpcMessageType { Request = 1, Response = 2 };
 
 class RpcClient;
 class RpcServer;
@@ -44,10 +43,11 @@ class RpcServerChannel {
 	virtual void notify_server(uint8_t *request_data) = 0;
 };
 
-class StandardIoChannel : public RpcClientChannel, public RpcServerChannel {
+class StandardIoChannel : public RpcServerChannel, public RpcClientChannel {
 	int stdin_handle;
 	int stdout_handle;
 	bool is_closed;
+	std::mutex stdio_mutex;
 
   public:
 	StandardIoChannel(int stdin_handle, int stdout_handle);
@@ -105,6 +105,8 @@ class RpcServer {
 	RpcServerChannel &channel;
 
   public:
+	RpcServer(RpcServerChannel &channel);
+
 	struct MethodCallResult {
 		uint8_t *data;
 		size_t size;
@@ -125,19 +127,18 @@ class RpcServer {
 		}
 	};
 
-	RpcServer(RpcServerChannel &channel);
-
 	void request_received(uint8_t *request_data);
 
   protected:
 	virtual MethodCallResult on_method_call(const std::string_view &method,
 											uint8_t *request_data,
-											size_t offset, MessageId msgId) = 0;
+											size_t offset,
+											MessageId msg_id) = 0;
 
   private:
 	void handle_method_call(const std::string_view &method,
 							uint8_t *request_data, size_t offset,
-							MessageId msgId);
+							MessageId msg_id);
 };
 
 } // namespace NanoPack
