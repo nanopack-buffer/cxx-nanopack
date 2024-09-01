@@ -26,7 +26,10 @@ add_library(nanopack
 	src/rpc/rpc_server.cxx
 	src/rpc/rpc_server_channel.cxx)
 
-target_include_directories(nanopack PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(nanopack
+	INTERFACE
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>)
 
 if (BUILD_TESTING)
 	add_executable(${PROJECT_NAME}_test test/test.cxx)
@@ -35,6 +38,30 @@ if (BUILD_TESTING)
 endif()
 
 install(TARGETS nanopack
+	EXPORT nanopackTargets
 	DESTINATION lib)
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/nanopack"
-	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(EXPORT nanopackTargets
+	FILE nanopackTargets.cmake
+	DESTINATION lib/cmake/nanopackTargets)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+	"${CMAKE_CURRENT_BINARY_DIR}/nanopackConfig.cmake"
+	INSTALL_DESTINATION "lib/cmake/nanopack"
+	NO_SET_AND_CHECK_MACRO
+	NO_CHECK_REQUIRED_COMPONENTS_MACRO
+)
+write_basic_package_version_file(
+	"${CMAKE_CURRENT_BINARY_DIR}/nanopackConfigVersion.cmake"
+	VERSION "0.1.0"
+	COMPATIBILITY AnyNewerVersion
+)
+
+install(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/nanopackConfig.cmake
+	${CMAKE_CURRENT_BINARY_DIR}/nanopackConfigVersion.cmake
+	DESTINATION lib/cmake/nanopack)
+
+export(EXPORT nanopackTargets
+	FILE "${CMAKE_CURRENT_BINARY_DIR}/nanopackTargets.cmake")
