@@ -37,4 +37,4 @@ endif()
 install(TARGETS nanopack
 	DESTINATION lib)
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/nanopack"
-	DESTINATION include)
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
