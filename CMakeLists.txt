@@ -45,7 +45,7 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/nanopack
 
 install(EXPORT nanopackTargets
 	FILE nanopackTargets.cmake
-	DESTINATION lib/cmake/nanopackTargets)
+	DESTINATION lib/cmake/nanopack)
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
