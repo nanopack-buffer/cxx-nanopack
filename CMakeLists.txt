@@ -27,7 +27,7 @@ add_library(nanopack
 	src/rpc/rpc_server_channel.cxx)
 
 target_include_directories(nanopack
-	INTERFACE
+	PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	$<INSTALL_INTERFACE:include>)
 
@@ -40,6 +40,9 @@ endif()
 install(TARGETS nanopack
 	EXPORT nanopackTargets
 	DESTINATION lib)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/nanopack
+	DESTINATION include)
+
 install(EXPORT nanopackTargets
 	FILE nanopackTargets.cmake
 	DESTINATION lib/cmake/nanopackTargets)
