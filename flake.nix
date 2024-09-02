@@ -38,7 +38,7 @@
         in
         {
           default = pkgs.mkShell {
-            buildInputs = [
+            packages = [
               pkgs.cmake
               pkgs.clang-tools
             ];
