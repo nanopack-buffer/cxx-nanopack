@@ -5,7 +5,7 @@ set -o nounset
 set -o errexit
 
 # make sure the cwd is where the script is.
-cd "$(dirname "$0")"
+pushd "$(dirname "$0")"
 
 for arg in "$@"; do declare $arg='1'; done
 
@@ -80,4 +80,6 @@ done
 
 $ar -rcs libnanopack.a *.o
 rm *.o
+
+popd
 
