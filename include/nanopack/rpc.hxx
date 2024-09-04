@@ -91,7 +91,9 @@ class RpcClient {
 		pending_async_requests;
 
   public:
-	RpcClient(RpcClientChannel &channel);
+	RpcClient();
+
+	void use_channel(RpcClientChannel &channel);
 
 	std::future<uint8_t *> send_request_data_async(MessageId msgId,
 												   uint8_t *data, size_t size);
@@ -105,7 +107,7 @@ class RpcServer {
 	RpcServerChannel *channel;
 
   public:
-	RpcServer(RpcServerChannel &channel);
+	RpcServer();
 
 	struct MethodCallResult {
 		uint8_t *data;
@@ -126,6 +128,8 @@ class RpcServer {
 			return hash_type{}(str);
 		}
 	};
+
+	void use_channel(RpcServerChannel &channel);
 
 	void request_received(uint8_t *request_data);
 

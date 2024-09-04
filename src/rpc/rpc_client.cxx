@@ -4,9 +4,13 @@
 #include <limits>
 #include <nanopack/rpc.hxx>
 
-NanoPack::RpcClient::RpcClient(NanoPack::RpcClientChannel &channel)
+NanoPack::RpcClient::RpcClient()
 	: dev(), rng(dev()), dist(0, std::numeric_limits<uint32_t>::max()),
 	  pending_async_requests() {
+	this->channel = nullptr;
+}
+
+void NanoPack::RpcClient::use_channel(NanoPack::RpcClientChannel &channel) {
 	this->channel = &channel;
 }
 

@@ -3,7 +3,9 @@
 #include <string_view>
 #include <thread>
 
-NanoPack::RpcServer::RpcServer(NanoPack::RpcServerChannel &channel) {
+NanoPack::RpcServer::RpcServer() { this->channel = nullptr; }
+
+void NanoPack::RpcServer::use_channel(NanoPack::RpcServerChannel &channel) {
 	this->channel = &channel;
 }
 
