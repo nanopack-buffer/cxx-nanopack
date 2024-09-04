@@ -1,3 +1,4 @@
 CompileFlags:
   Add:
-    - "-I../include"
+    - -I/home/kenneth/dev/nanopack/cxx-nanopack/include
+    - --std=c++20
