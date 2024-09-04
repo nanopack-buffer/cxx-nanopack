@@ -11,6 +11,7 @@ NanoPack::RpcClient::RpcClient()
 }
 
 void NanoPack::RpcClient::use_channel(NanoPack::RpcClientChannel &channel) {
+	channel.bind_to_client(*this);
 	this->channel = &channel;
 }
 

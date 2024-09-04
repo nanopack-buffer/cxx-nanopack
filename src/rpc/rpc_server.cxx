@@ -6,6 +6,7 @@
 NanoPack::RpcServer::RpcServer() { this->channel = nullptr; }
 
 void NanoPack::RpcServer::use_channel(NanoPack::RpcServerChannel &channel) {
+	channel.bind_to_server(*this);
 	this->channel = &channel;
 }
 
