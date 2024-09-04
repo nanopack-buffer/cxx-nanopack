@@ -1,11 +1,11 @@
 #include <cstdint>
-#include <iostream>
 #include <nanopack/rpc.hxx>
 #include <string_view>
 #include <thread>
 
-NanoPack::RpcServer::RpcServer(NanoPack::RpcServerChannel &channel)
-	: channel(channel) {}
+NanoPack::RpcServer::RpcServer(NanoPack::RpcServerChannel &channel) {
+	this->channel = &channel;
+}
 
 void NanoPack::RpcServer::request_received(uint8_t *request_data) {
 	const uint32_t msgId = request_data[1] | request_data[2] << 8 |
@@ -25,5 +25,5 @@ void NanoPack::RpcServer::handle_method_call(const std::string_view &method,
 											 uint8_t *request_data,
 											 size_t offset, MessageId msgId) {
 	auto result = on_method_call(method, request_data, offset, msgId);
-	channel.send_response(result.data, result.size);
+	channel->send_response(result.data, result.size);
 }

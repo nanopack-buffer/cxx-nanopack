@@ -86,7 +86,7 @@ class RpcClient {
 	std::mt19937 rng;
 	std::uniform_int_distribution<std::mt19937::result_type> dist;
 
-	RpcClientChannel &channel;
+	RpcClientChannel *channel;
 	std::unordered_map<MessageId, std::promise<uint8_t *>>
 		pending_async_requests;
 
@@ -102,7 +102,7 @@ class RpcClient {
 };
 
 class RpcServer {
-	RpcServerChannel &channel;
+	RpcServerChannel *channel;
 
   public:
 	RpcServer(RpcServerChannel &channel);

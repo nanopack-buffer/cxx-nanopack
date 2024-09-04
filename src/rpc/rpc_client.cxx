@@ -1,13 +1,14 @@
 #include <cstddef>
 #include <cstdint>
 #include <future>
-#include <iostream>
 #include <limits>
 #include <nanopack/rpc.hxx>
 
 NanoPack::RpcClient::RpcClient(NanoPack::RpcClientChannel &channel)
 	: dev(), rng(dev()), dist(0, std::numeric_limits<uint32_t>::max()),
-	  channel(channel), pending_async_requests() {}
+	  pending_async_requests() {
+	this->channel = &channel;
+}
 
 std::future<uint8_t *>
 NanoPack::RpcClient::send_request_data_async(MessageId msgId, uint8_t *data,
@@ -15,7 +16,7 @@ NanoPack::RpcClient::send_request_data_async(MessageId msgId, uint8_t *data,
 	std::promise<uint8_t *> promise;
 	auto future = promise.get_future();
 	pending_async_requests.emplace(msgId, std::move(promise));
-	channel.send_request(data, size);
+	channel->send_request(data, size);
 	return future;
 }
 
