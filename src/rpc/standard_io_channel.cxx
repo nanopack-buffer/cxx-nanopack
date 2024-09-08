@@ -23,9 +23,9 @@ void NanoPack::StandardIoChannel::close() { is_closed = true; }
 void NanoPack::StandardIoChannel::send_request(uint8_t *data, size_t size) {
 	uint8_t msg_size_buf[sizeof(uint32_t)];
 	msg_size_buf[0] = size & 0xFF;
-	msg_size_buf[1] = size & 0xFF00 >> 8;
-	msg_size_buf[2] = size & 0xFF0000 >> 16;
-	msg_size_buf[3] = size & 0xFF000000 >> 24;
+	msg_size_buf[1] = (size & 0xFF00) >> 8;
+	msg_size_buf[2] = (size & 0xFF0000) >> 16;
+	msg_size_buf[3] = (size & 0xFF000000) >> 24;
 
 	std::lock_guard<std::mutex> guard(stdio_mutex);
 
@@ -36,9 +36,9 @@ void NanoPack::StandardIoChannel::send_request(uint8_t *data, size_t size) {
 void NanoPack::StandardIoChannel::send_response(uint8_t *data, size_t size) {
 	uint8_t msg_size_buf[sizeof(uint32_t)];
 	msg_size_buf[0] = size & 0xFF;
-	msg_size_buf[1] = size & 0xFF00 >> 8;
-	msg_size_buf[2] = size & 0xFF0000 >> 16;
-	msg_size_buf[3] = size & 0xFF000000 >> 24;
+	msg_size_buf[1] = (size & 0xFF00) >> 8;
+	msg_size_buf[2] = (size & 0xFF0000) >> 16;
+	msg_size_buf[3] = (size & 0xFF000000) >> 24;
 
 	std::lock_guard<std::mutex> guard(stdio_mutex);
 
