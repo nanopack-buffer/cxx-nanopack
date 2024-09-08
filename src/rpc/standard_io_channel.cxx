@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <mutex>
 #include <nanopack/rpc.hxx>
+#include <thread>
 #include <unistd.h>
 
 NanoPack::StandardIoChannel::StandardIoChannel(int stdin_handle,
@@ -9,7 +10,11 @@ NanoPack::StandardIoChannel::StandardIoChannel(int stdin_handle,
 	: stdin_handle(stdin_handle), stdout_handle(stdout_handle),
 	  is_closed(true) {}
 
-void NanoPack::StandardIoChannel::open() { is_closed = false; }
+void NanoPack::StandardIoChannel::open() {
+	is_closed = false;
+	std::thread t(&StandardIoChannel::read_from_stdout, this);
+	t.detach();
+}
 
 void NanoPack::StandardIoChannel::close() { is_closed = true; }
 
