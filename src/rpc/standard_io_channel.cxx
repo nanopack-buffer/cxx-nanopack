@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <iostream>
 #include <mutex>
 #include <nanopack/rpc.hxx>
 #include <thread>
@@ -60,7 +62,7 @@ void NanoPack::StandardIoChannel::read_from_stdout() {
 							(msg_size_buf[2] << 16) | (msg_size_buf[3] << 24);
 
 		uint8_t *msg_data = (uint8_t *)std::malloc(msg_size * sizeof(uint8_t));
-		read(stdout_handle, msg_data, sizeof(uint32_t));
+		read(stdout_handle, msg_data, msg_size);
 
 		switch (msg_data[0]) {
 		case NanoPack::RpcMessageType::Request:
