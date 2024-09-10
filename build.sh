@@ -1,25 +1,21 @@
 #!/bin/sh
 
 # error when there are unset variables instead of silently ignoring
-set -o nounset
-set -o errexit
+set -eu
 
 # make sure the cwd is where the script is.
-pushd "$(dirname "$0")"
+pushd "$(dirname "$0")" >> /dev/null
 
-for arg in "$@"; do declare $arg='1'; done
+for arg in "$@"; do declare $arg=1; done
 
 # use clang by default unless gcc is specified
-if [ ! -v gcc ]; then clang=1; fi
+if [ ! -v clang ]; then gcc=1; fi
 # do release build unless debug is specified
 if [ ! -v debug ]; then release=1; fi
 
-if [ -v clang ]; then
-	compiler="${CC:-clang}"
-fi
-if [ -v gcc ]; then
-	compiler="${CC:-gcc}"
-fi
+compiler="${CC:-g++}"
+if [ -v clang ]; then compiler="clang"; fi
+if [ -v g++ ]; then	compiler="g++"; fi
 
 ar="${AR:-ar}"
 
@@ -81,5 +77,5 @@ done
 $ar -rcs libnanopack.a *.o
 rm *.o
 
-popd
+popd >> /dev/null
 
